@@ -45,8 +45,19 @@ public class YailEvalTest extends TestCase {
   @Override
   public void setUp() throws Exception {
     scheme = new Scheme();
-    String yailRuntimeLibrary = Compiler.getResource(Compiler.YAIL_RUNTIME);
-    String yailSchemeTests = YAIL_SCHEME_TESTS;
+
+    String yailRuntimeLibrary;
+    String yailSchemeTests;
+    
+    if (System.getProperty("os.name").startsWith("Windows")) {
+       yailRuntimeLibrary = Compiler.getResource(Compiler.YAIL_RUNTIME).replace('\\','/');
+       yailSchemeTests = YAIL_SCHEME_TESTS.replace('\\','/');    	
+    }
+    else {   	
+   	   yailRuntimeLibrary = Compiler.getResource(Compiler.YAIL_RUNTIME);
+       yailSchemeTests = YAIL_SCHEME_TESTS;
+    }
+    	
     try {
       scheme.eval("(load \"" + yailRuntimeLibrary + "\")");
       scheme.eval("(load \"" + yailSchemeTests + "\")");
