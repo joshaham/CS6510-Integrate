@@ -111,6 +111,9 @@ public class DownloadServlet extends OdeServlet {
         uriComponents = uri.split("/", SPLIT_LIMIT_PROJECT_OUTPUT);
         long projectId = Long.parseLong(uriComponents[PROJECT_ID_INDEX]);
         String target = (uriComponents.length > TARGET_INDEX) ? uriComponents[TARGET_INDEX] : null;
+
+        // DEMO: download apk or html?
+
         downloadableFile = fileExporter.exportProjectOutputFile(userId, projectId, target);
 
       } else if (downloadKind.equals(ServerLayout.DOWNLOAD_PROJECT_SOURCE)) {

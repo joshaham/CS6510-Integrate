@@ -504,6 +504,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
 
     LOG.info("DEMO: building web app file = " + builtFileId);    
 
+    String componentJSONFileId = null;
     String componentJSON = null;
     String componentJavaScript = null;  // ToDo: get this out of storage as well, once it's there
     
@@ -513,14 +514,17 @@ public final class YoungAndroidProjectService extends CommonProjectService {
       if (StorageUtil.isTextFile(srcFileId)) {  
         // This will dump the *.scm,*.bky and *.yail files.
         String fileContents = storageIo.downloadFile(userId, projectId, srcFileId, StorageUtil.DEFAULT_CHARSET);
-        LOG.info(srcFileId + ":" + fileContents);
 
-        // If we see an scm file - that's actually t
+        // If we see an scm file - that's actually the component json
         if (srcFileId.endsWith(".scm"))
         {
           // DEMO TODO: This assumes there is only one screen 
+          componentJSONFileId = srcFileId;
           componentJSON = fileContents;
-        }          
+        }
+        else {
+            LOG.info(srcFileId + ":  " + fileContents);        	
+        }
       }
       else {    		
         LOG.info("DEMO: file is not of type text: " + srcFileId);
@@ -537,12 +541,15 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     	}
     }
         
-    // take this all and make it into a method - *start*
+    // STEVE's METHOD STARTS HERE
+    // take this all and make it into a method, 
+    // passing in ComponentJSON (and javascript and blockly?) 
+    
     // define the fixed html "shell"
     String htmlShell = 
     		"<!doctype html>" + 
     		"<head>" +
-    //"<meta charset=utf-8"">" +
+    "<meta charset=\"utf-8\">" +
     "<title>" + projectName + "</title>" +  
     "<head>" +
     " <!-- JAVASCRIPT INSERT HERE -->" +
@@ -553,23 +560,27 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     "</html>";
 
  
+    LOG.info(componentJSONFileId + ":  " + componentJSON);        	
+
     // Call the method to return an array of html strings for the components
-    //ArrayList<String> componentHtml = getComponentHtml(componentData);
+    //ArrayList<String> componentHtml = getComponentHtml(componentJSON);
     
     // Combine the shell with the component Html
     // Do javascript too?
     // TODO: Steve
-    String builtHtml = htmlShell;
-    // END - code that moves to another method
-    
+    // STEVE's METHOD ENDS HERE, add call below
+   String builtHtml = htmlShell;  // = stevesMethod(componentJSON);
+     
     // Save built file (add the id as an output file, then add the contents for that id)
+    LOG.info("DEMO: Storing web output" + builtFileId);
     storageIo.addOutputFilesToProject(userId, projectId, builtFileId);
     storageIo.uploadFileForce(projectId, builtFileId, userId, builtHtml, StorageUtil.DEFAULT_CHARSET);
     
     // Demo file is built.    
-    // File can be retrieved via exportUserFile in FileExporterImpl
+    // File can be retrieved via FileExporterImpl or DownloadServlet
+    // (= project output for a web target)
     
-    return new RpcResult(true, "Building " + projectName, "");
+    return new RpcResult(true, "Built web output for " + projectName, "");
   }
 
   
@@ -611,6 +622,9 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     		LOG.info("DEMO: file is not of type text: " + srcFileId);
     	}    	  	
     }
+    // DEMO: hack to try building html
+    // Uncomment this to try building the html
+    //buildWebOutput(user, projectId);
     
     // Store the userId and projectId based on the nonce
 
@@ -620,7 +634,10 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     // old versions.
     List<String> buildOutputFiles = storageIo.getProjectOutputFiles(userId, projectId);
     for (String buildOutputFile : buildOutputFiles) {
-      storageIo.deleteFile(userId, projectId, buildOutputFile);
+      if (!buildOutputFile.endsWith(".html")) {
+        storageIo.deleteFile(userId, projectId, buildOutputFile);
+        LOG.info("DEMO: skipping deleting html output");
+      }
     }
     URL buildServerUrl = null;
     ProjectSourceZip zipFile = null;
