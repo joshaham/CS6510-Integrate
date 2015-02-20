@@ -450,7 +450,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
             StorageUtil.DEFAULT_CHARSET);
         
-        // DEMO - dump file contents here
+        // DEMO - dump initial file contents here
 
         String yailFileContents = "";  // start empty
         storageIo.addSourceFilesToProject(userId, projectId, false, yailFileName);
@@ -500,24 +500,43 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String projectName = storageIo.getProjectName(userId, projectId);
     String outputFileDir = BUILD_FOLDER + "/" + target + "/";   // Note: forces a target
     String demoFileName = "demopage.html";
-    String fileId = outputFileDir + demoFileName; 
+    String builtFileId = outputFileDir + demoFileName; 
 
-    LOG.info("DEMO: building web app file = " + fileId);    
+    LOG.info("DEMO: building web app file = " + builtFileId);    
+
+    String componentJSON = null;
+    String componentJavaScript = null;  // ToDo: get this out of storage as well, once it's there
+    
+    // Find component JSON file... 
+    // (and log source files)
+    for (String srcFileId : storageIo.getProjectSourceFiles(userId, projectId)) {
+      if (StorageUtil.isTextFile(srcFileId)) {  
+        // This will dump the *.scm,*.bky and *.yail files.
+        String fileContents = storageIo.downloadFile(userId, projectId, srcFileId, StorageUtil.DEFAULT_CHARSET);
+        LOG.info(srcFileId + ":" + fileContents);
+
+        // If we see an scm file - that's actually t
+        if (srcFileId.endsWith(".scm"))
+        {
+          // DEMO TODO: This assumes there is only one screen 
+          componentJSON = fileContents;
+        }          
+      }
+      else {    		
+        LOG.info("DEMO: file is not of type text: " + srcFileId);
+      }    	  	
+    }
     
     // Delete the existing built html file, if any, so that future attempts to get it won't get
     // old versions.
     List<String> buildOutputFiles = storageIo.getProjectOutputFiles(userId, projectId);
     for (String buildOutputFile : buildOutputFiles) {
     	
-    	if (buildOutputFile.equalsIgnoreCase(fileId)) {
+    	if (buildOutputFile.equalsIgnoreCase(builtFileId)) {
     		storageIo.deleteFile(userId, projectId, buildOutputFile);
     	}
     }
- 
-    // Get component data file 
-    
-    // Get JS data
-    
+        
     // take this all and make it into a method - *start*
     // define the fixed html "shell"
     String htmlShell = 
@@ -544,8 +563,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     // END - code that moves to another method
     
     // Save built file (add the id as an output file, then add the contents for that id)
-    storageIo.addOutputFilesToProject(userId, projectId, fileId);
-    storageIo.uploadFileForce(projectId, fileId, userId, builtHtml, StorageUtil.DEFAULT_CHARSET);
+    storageIo.addOutputFilesToProject(userId, projectId, builtFileId);
+    storageIo.uploadFileForce(projectId, builtFileId, userId, builtHtml, StorageUtil.DEFAULT_CHARSET);
     
     // Demo file is built.    
     // File can be retrieved via exportUserFile in FileExporterImpl
@@ -582,6 +601,17 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String projectName = storageIo.getProjectName(userId, projectId);
     String outputFileDir = BUILD_FOLDER + '/' + target;
 
+    // Dump source files in storage for debug purposes
+    for (String srcFileId : storageIo.getProjectSourceFiles(userId, projectId)) {
+    	if (StorageUtil.isTextFile(srcFileId)) {           
+          String fileContents = storageIo.downloadFile(userId, projectId, srcFileId, StorageUtil.DEFAULT_CHARSET);
+          LOG.info("DEMO txt source = " + srcFileId + ":" + fileContents);
+    	}
+    	else {    		
+    		LOG.info("DEMO: file is not of type text: " + srcFileId);
+    	}    	  	
+    }
+    
     // Store the userId and projectId based on the nonce
 
     storageIo.storeNonce(nonce, userId, projectId);
