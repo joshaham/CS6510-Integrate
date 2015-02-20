@@ -67,6 +67,8 @@ public final class Compiler {
 
   public static final String RUNTIME_FILES_DIR = "/files/";
 
+  public static final String SYSTEM_OS_NAME = System.getProperty("os.name");
+  
   // Build info constants.  Used for permissions, libraries and assets.
   private static final String ARMEABI_V7A_DIRECTORY = "armeabi-v7a";
   // Must match ComponentProcessor.ARMEABI_V7A_SUFFIX
@@ -93,8 +95,7 @@ public final class Compiler {
 
   private static final String DEFAULT_VERSION_CODE = "1";
   private static final String DEFAULT_VERSION_NAME = "1.0";
-  private static final String DEFAULT_APP_NAME = "";
-
+  
   private static final String COMPONENT_BUILD_INFO =
       RUNTIME_FILES_DIR + "simple_components_build_info.json";
 
@@ -313,7 +314,7 @@ public final class Compiler {
     String projectName = project.getProjectName();
     String vCode = (project.getVCode() == null) ? DEFAULT_VERSION_CODE : project.getVCode();
     String vName = (project.getVName() == null) ? DEFAULT_VERSION_NAME : cleanVname(project.getVName());
-    String aName = (project.getAName() == null) ? DEFAULT_APP_NAME : project.getAName();
+
     LOG.log(Level.INFO, "VCode: " + project.getVCode());
     LOG.log(Level.INFO, "VName: " + project.getVName());
 
@@ -379,11 +380,8 @@ public final class Compiler {
       // TODONE(jis): Turned off debuggable. No one really uses it and it represents a security
       // risk for App Inventor App end-users.
       out.write("android:debuggable=\"false\" ");
-      if (aName.equals("")) {
-        out.write("android:label=\"" + projectName + "\" ");
-      } else {
-        out.write("android:label=\"" + aName + "\" ");
-      }
+      out.write("android:label=\"" + projectName + "\" ");
+
       out.write("android:icon=\"@drawable/ya\" ");
       if (isForCompanion) {              // This is to hook into ACRA
         out.write("android:name=\"com.google.appinventor.components.runtime.ReplApplication\" ");
@@ -746,16 +744,20 @@ public final class Compiler {
       List<String> classFileNames = Lists.newArrayListWithCapacity(sources.size());
       boolean userCodeExists = false;
       for (Project.SourceDescriptor source : sources) {
-        String sourceFileName = source.getFile().getAbsolutePath();
+        String sourceFileName = generateAbsolutePathForOs(source.getFile());
         LOG.log(Level.INFO, "source file: " + sourceFileName);
-        int srcIndex = sourceFileName.indexOf("/../src/");
-        String sourceFileRelativePath = sourceFileName.substring(srcIndex + 8);
-        String classFileName = (classesDir.getAbsolutePath() + "/" + sourceFileRelativePath)
-        .replace(YoungAndroidConstants.YAIL_EXTENSION, ".class");
-        if (System.getProperty("os.name").startsWith("Windows")) {
-          classFileName = classesDir.getAbsolutePath()
-            .replace(YoungAndroidConstants.YAIL_EXTENSION, ".class");
+ 
+        String classFileName;
+        if (SYSTEM_OS_NAME.startsWith("Windows")) {
+            classFileName = generateAbsolutePathForOs(classesDir)
+              .replace(YoungAndroidConstants.YAIL_EXTENSION, ".class");
         }
+        else {
+        	int srcIndex = sourceFileName.indexOf("/../src/");
+        	String sourceFileRelativePath = sourceFileName.substring(srcIndex + 8);
+        	classFileName = (classesDir.getAbsolutePath() + "/" + sourceFileRelativePath)
+        			.replace(YoungAndroidConstants.YAIL_EXTENSION, ".class");
+        } 
 
         // Check whether user code exists by seeing if a left parenthesis exists at the beginning of
         // a line in the file
@@ -872,7 +874,7 @@ public final class Compiler {
       // This works when a JDK is installed with the JRE.
       jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
           File.separator + "jarsigner");
-      if (System.getProperty("os.name").startsWith("Windows")) {
+      if (SYSTEM_OS_NAME.startsWith("Windows")) {
         jarsignerFile = new File(javaHome + File.separator + ".." + File.separator + "bin" +
             File.separator + "jarsigner.exe");
       }
@@ -908,16 +910,16 @@ public final class Compiler {
     // Need to make sure assets directory exists otherwise zipalign will fail.
     createDirectory(project.getAssetsDirectory());
     String zipAlignTool;
-    String osName = System.getProperty("os.name");
-    if (osName.equals("Mac OS X")) {
+
+    if (SYSTEM_OS_NAME.equals("Mac OS X")) {
       zipAlignTool = MAC_ZIPALIGN_TOOL;
-    } else if (osName.equals("Linux")) {
+    } else if (SYSTEM_OS_NAME.equals("Linux")) {
       zipAlignTool = LINUX_ZIPALIGN_TOOL;
-    } else if (osName.startsWith("Windows")) {
+    } else if (SYSTEM_OS_NAME.startsWith("Windows")) {
       zipAlignTool = WINDOWS_ZIPALIGN_TOOL;
     } else {
-      LOG.warning("YAIL compiler - cannot run ZIPALIGN on OS " + osName);
-      err.println("YAIL compiler - cannot run ZIPALIGN on OS " + osName);
+      LOG.warning("YAIL compiler - cannot run ZIPALIGN on OS " + SYSTEM_OS_NAME);
+      err.println("YAIL compiler - cannot run ZIPALIGN on OS " + SYSTEM_OS_NAME);
       userErrors.print(String.format(ERROR_IN_STAGE, "ZIPALIGN"));
       return false;
     }
@@ -1161,7 +1163,9 @@ public final class Compiler {
             file);
         resources.put(resourcePath, file);
       }
-      return file.getAbsolutePath();
+      
+  	  return generateAbsolutePathForOs(file);
+ 
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
@@ -1267,4 +1271,28 @@ public final class Compiler {
       return Compiler.currentProgress;
     }
   }
+  
+  /*
+   * Flip slashes when running on a windows box.
+   * This method can be used in place of File.getAbsolutePath
+   */
+  public static String generateAbsolutePathForOs(File file)
+  {
+      if (!SYSTEM_OS_NAME.startsWith("Windows")) {
+	      return file.getAbsolutePath();
+      }
+      else {
+          return file.getAbsolutePath().replace('\\','/');  	  
+      }
+  }  
+  
+  public static String fixPathSeparatorsForOs(String path)
+  {
+      if (!SYSTEM_OS_NAME.startsWith("Windows")) {
+	      return path;
+      }
+      else {
+          return path.replace('\\','/');  	  
+      }
+  }    
 }
