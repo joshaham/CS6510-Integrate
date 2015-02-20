@@ -294,4 +294,10 @@ public abstract class CommonProjectService {
    *           -1: Build is not yet done.
    */
   public abstract RpcResult getBuildResult(User user, long projectId, String target);
+
+  // DEMO
+  public abstract RpcResult getWebBuildResult(User user, long projectId);
+  
+  public abstract RpcResult buildWebOutput(User user, long projectId);
+
 }

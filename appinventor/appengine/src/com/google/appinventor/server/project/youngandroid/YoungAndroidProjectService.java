@@ -449,6 +449,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
         storageIo.addSourceFilesToProject(userId, projectId, false, blocklyFileName);
         storageIo.uploadFileForce(projectId, blocklyFileName, userId, blocklyFileContents,
             StorageUtil.DEFAULT_CHARSET);
+        
+        // DEMO - dump file contents here
 
         String yailFileContents = "";  // start empty
         storageIo.addSourceFilesToProject(userId, projectId, false, yailFileName);
@@ -487,6 +489,79 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     } else {
       return super.deleteFile(userId, projectId, fileId);
     }
+  }
+
+  // DEMO
+  // To do, need get build result as well, to tell client "done"
+  // and then need "get built web file" (= file exporter?)
+  public RpcResult buildWebOutput(User user, long projectId) {
+    String target = "web";
+    String userId = user.getUserId();
+    String projectName = storageIo.getProjectName(userId, projectId);
+    String outputFileDir = BUILD_FOLDER + "/" + target + "/";   // Note: forces a target
+    String demoFileName = "demopage.html";
+    String fileId = outputFileDir + demoFileName; 
+
+    LOG.info("DEMO: building web app file = " + fileId);    
+    
+    // Delete the existing built html file, if any, so that future attempts to get it won't get
+    // old versions.
+    List<String> buildOutputFiles = storageIo.getProjectOutputFiles(userId, projectId);
+    for (String buildOutputFile : buildOutputFiles) {
+    	
+    	if (buildOutputFile.equalsIgnoreCase(fileId)) {
+    		storageIo.deleteFile(userId, projectId, buildOutputFile);
+    	}
+    }
+ 
+    // Get component data file 
+    
+    // Get JS data
+    
+    // take this all and make it into a method - *start*
+    // define the fixed html "shell"
+    String htmlShell = 
+    		"<!doctype html>" + 
+    		"<head>" +
+    //"<meta charset=utf-8"">" +
+    "<title>" + projectName + "</title>" +  
+    "<head>" +
+    " <!-- JAVASCRIPT INSERT HERE -->" +
+    "</head>" +
+    "<body>" + 
+    " <!-- COMPONENT HTML INSERT HERE -->" +
+    "</body>" +
+    "</html>";
+
+ 
+    // Call the method to return an array of html strings for the components
+    //ArrayList<String> componentHtml = getComponentHtml(componentData);
+    
+    // Combine the shell with the component Html
+    // Do javascript too?
+    // TODO: Steve
+    String builtHtml = htmlShell;
+    // END - code that moves to another method
+    
+    // Save built file (add the id as an output file, then add the contents for that id)
+    storageIo.addOutputFilesToProject(userId, projectId, fileId);
+    storageIo.uploadFileForce(projectId, fileId, userId, builtHtml, StorageUtil.DEFAULT_CHARSET);
+    
+    // Demo file is built.    
+    // File can be retrieved via exportUserFile in FileExporterImpl
+    
+    return new RpcResult(true, "Building " + projectName, "");
+  }
+
+  
+  // DEMO - This always returns "yes file is built" so client then downloads the html
+  public RpcResult getWebBuildResult(User user, long projectId) {
+	    String target = "web";
+	    String userId = user.getUserId();
+	    //updateCurrentProgress(user, projectId, target);
+	    currentProgress = 100;
+	    RpcResult buildResult = new RpcResult(0, ""+currentProgress, ""); // Build finished
+	    return buildResult;
   }
 
   /**

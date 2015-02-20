@@ -1290,6 +1290,7 @@ public class ObjectifyStorageIo implements  StorageIo {
   public long uploadFile(final long projectId, final String fileName, final String userId,
       final String content, final String encoding) throws BlocksTruncatedException {
     try {
+      LOG.info("DEMO: upload file = " + fileName);
       return uploadRawFile(projectId, fileName, userId, false, content.getBytes(encoding));
     } catch (UnsupportedEncodingException e) {
       throw CrashReport.createAndLogError(LOG, null, "Unsupported file content encoding,"
@@ -1301,6 +1302,7 @@ public class ObjectifyStorageIo implements  StorageIo {
   public long uploadFileForce(final long projectId, final String fileName, final String userId,
       final String content, final String encoding) {
     try {
+      LOG.info("DEMO: upload file w overwrite = " + fileName);
       return uploadRawFileForce(projectId, fileName, userId, content.getBytes(encoding));
     } catch (UnsupportedEncodingException e) {
       throw CrashReport.createAndLogError(LOG, null, "Unsupported file content encoding,"
