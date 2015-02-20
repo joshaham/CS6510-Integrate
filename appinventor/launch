@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Terminate with:
+# ps aux | grep 8888
+# kill -9 <PID>
+
+# Script for launching app inventor	
+/Users/Ray/documents/programming-work/appengine-java-sdk-1.9.17/bin/dev_appserver.sh --port=8888 --address=0.0.0.0 appengine/build/war/ > serverlog.out &
+

@@ -15,6 +15,7 @@ import com.google.appinventor.client.explorer.commands.ChainableCommand;
 import com.google.appinventor.client.explorer.commands.CopyYoungAndroidProjectCommand;
 import com.google.appinventor.client.explorer.commands.DownloadProjectOutputCommand;
 import com.google.appinventor.client.explorer.commands.GenerateYailCommand;
+import com.google.appinventor.client.explorer.commands.GenerateJavaScriptCommand;
 import com.google.appinventor.client.explorer.commands.SaveAllEditorsCommand;
 import com.google.appinventor.client.explorer.commands.ShowBarcodeCommand;
 import com.google.appinventor.client.explorer.commands.ShowProgressBarCommand;
@@ -111,6 +112,8 @@ public class TopToolbar extends Composite {
   private static final String WIDGET_NAME_DOWNLOAD_USER_SOURCE = "DownloadUserSource";
   private static final String WIDGET_NAME_SWITCH_TO_DEBUG = "SwitchToDebugPane";
 
+  private static final String WIDGET_NAME_GENERATE_JAVASCRIPT = "GenerateJavaScript";
+  
   public DropDownButton fileDropDown;
   public DropDownButton connectDropDown;
   public DropDownButton buildDropDown;
@@ -187,6 +190,8 @@ public class TopToolbar extends Composite {
       buildItems.add(new DropDownItem(WIDGET_NAME_BUILD_YAIL, MESSAGES.generateYailMenuItem(),
           new GenerateYailAction()));
     }
+    buildItems.add(new DropDownItem(WIDGET_NAME_GENERATE_JAVASCRIPT, MESSAGES.toJavaScript(),
+    		new GenerateJavaScriptAction()));
 
     // Help -> {About, Library, Get Started, Tutorials, Troubleshooting, Forums, Report an Issue}
     helpItems.add(new DropDownItem(WIDGET_NAME_ABOUT, MESSAGES.aboutMenuItem(),
@@ -638,6 +643,29 @@ public class TopToolbar extends Composite {
       }
     }
   }
+
+
+  private class GenerateJavaScriptAction implements Command {
+    @Override
+    public void execute() {
+      ProjectRootNode projectRootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
+      if (projectRootNode != null) {
+        String target = YoungAndroidProjectNode.YOUNG_ANDROID_TARGET_ANDROID;
+        ChainableCommand cmd = new SaveAllEditorsCommand(new GenerateJavaScriptCommand(null));
+        //updateBuildButton(true);
+        cmd.startExecuteChain(Tracking.PROJECT_ACTION_BUILD_YAIL_YA, projectRootNode,
+            new Command() {
+              @Override
+              public void execute() {
+                //updateBuildButton(false);
+              }
+            });
+      }
+    }
+  }
+
+
+
 
   private static class AboutAction implements Command {
     @Override

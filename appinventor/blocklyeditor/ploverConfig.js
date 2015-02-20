@@ -108,6 +108,18 @@
     "./src/generators/yail/colors.js",
     "./src/generators/yail/variables.js",
     "./src/generators/yail/procedures.js",
+    
+    // generator files for JavaScript
+    //"./src/generators/javascript/all.js",
+    "./src/generators/javascript.js",
+    "./src/generators/javascript/colour.js",
+    "./src/generators/javascript/lists.js",
+    "./src/generators/javascript/logic.js",
+    "./src/generators/javascript/loops.js",
+    "./src/generators/javascript/math.js",
+    "./src/generators/javascript/procedures.js",
+    "./src/generators/javascript/text.js",
+    "./src/generators/javascript/variables.js",
 
     // Repl
     "./src/replmgr.js"

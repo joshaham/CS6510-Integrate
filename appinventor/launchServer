@@ -1,0 +1,9 @@
+#!/bin/sh
+
+# Terminate with:
+# ps aux | grep 8888
+# kill -9 <PID>
+
+# Launches build server
+cd /Users/Ray/documents/programming-work/CS6510-Integrate/appinventor/buildserver
+ant RunLocalBuildServer > ../../buildserver-log.out &

@@ -349,6 +349,16 @@ public final class YaBlocksEditor extends FileEditor
             packageNameFromPath(getFileId())));
   }
 
+
+  // Just added this to handle the javascript generation route
+  public FileDescriptorWithContent getJavaScript() throws YailGenerationException {
+    return new FileDescriptorWithContent(getProjectId(), yailFileName(),
+        blocksArea.getJavaScript(myFormEditor.encodeFormAsJsonString(),
+          packageNameFromPath(getFileId())));
+  }
+
+
+
   /**
    * Converts a source file path (e.g.,
    * src/com/gmail/username/project1/Form.extension) into a package

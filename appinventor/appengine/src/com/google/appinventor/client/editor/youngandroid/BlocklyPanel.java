@@ -569,6 +569,19 @@ public class BlocklyPanel extends HTMLPanel {
     }
   }
 
+
+  public String getJavaScript(String formJson, String packageName) {
+    String code = doGetJavaScript(formName, formJson, packageName);
+    // try {
+    //   PrintWriter out = new PrintWriter("out.js");
+    //   out.println(code);
+    //   out.close();
+    // } catch (IOException e) {}
+    return code;
+  }
+
+
+
   /**
    * Send component data (json and form name) to Blockly for building
    * yail for the REPL.
@@ -907,6 +920,14 @@ public class BlocklyPanel extends HTMLPanel {
   public static native String doGetYail(String formName, String formJson, String packageName) /*-{
     return $wnd.Blocklies[formName].Yail.getFormYail(formJson, packageName);
   }-*/;
+
+
+  public static native String doGetJavaScript(String formName, String formJson, String packageName) /*-{
+    var code = $wnd.Blocklies[formName].JavaScript.getFormJavaScript(formJson, packageName);
+    $wnd.console.log(code);
+    return code;
+  }-*/;
+
 
   public static native void doSendJson(String formName, String formJson, String packageName) /*-{
     $wnd.Blocklies[formName].ReplMgr.sendFormData(formJson, packageName);
