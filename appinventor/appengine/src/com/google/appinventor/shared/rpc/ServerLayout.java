@@ -102,7 +102,13 @@ public class ServerLayout {
    * for downloading a project's output
    */
   public static final String DOWNLOAD_PROJECT_OUTPUT = "project-output";
-
+  
+  
+    /* DEMO */
+  public static final String DOWNLOAD_WEB_OUTPUT = "web-output";
+    /* END DEMO */
+    
+    
   /**
    * Relative path within {@link com.google.appinventor.server.DownloadServlet}
    * for downloading a project's sources
