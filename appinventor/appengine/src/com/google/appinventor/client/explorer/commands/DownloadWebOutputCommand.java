@@ -43,7 +43,7 @@ public class DownloadWebOutputCommand extends ChainableCommand {
   @Override
   public void execute(ProjectNode node) {
     Downloader.getInstance().download(ServerLayout.DOWNLOAD_SERVLET_BASE +
-        ServerLayout.DOWNLOAD_WEB_OUTPUT + "/" + node.getProjectId() + "/" + target);
+        ServerLayout.DOWNLOAD_BUILD_OUTPUT + "/" + node.getProjectId() + "/" + target);
   }
 }
 
