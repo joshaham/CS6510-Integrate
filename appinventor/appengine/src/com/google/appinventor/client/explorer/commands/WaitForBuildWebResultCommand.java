@@ -46,7 +46,7 @@ public class WaitForBuildWebResultCommand extends ChainableCommand {
    *
    * @param target the build target
    */
-  public WaitForBuildResultCommand(String target) {
+  public WaitForBuildWebResultCommand(String target) {
     this(target, null);
   }
 
@@ -57,7 +57,7 @@ public class WaitForBuildWebResultCommand extends ChainableCommand {
    * @param target the build target
    * @param nextCommand the command to execute after the build has finished
    */
-  public WaitForBuildResultCommand(String target, ChainableCommand nextCommand) {
+  public WaitForBuildWebResultCommand(String target, ChainableCommand nextCommand) {
     super(nextCommand);
     this.target = target;
     messagesOutput = MessagesOutput.getMessagesOutput();

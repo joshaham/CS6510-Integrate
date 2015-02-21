@@ -519,6 +519,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("USB")
   @Description("Message providing details about starting a USB connection.")
   String usbMenuItem();
+  
+  @DefaultMessage("Live Edit")
+  @Description("Live edit the app")
+  String liveEditMenuItem();
 
   @DefaultMessage("Reset Connection")
   @Description("Reset all connections.")
@@ -532,6 +536,10 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Build")
   @Description("Label of the button leading to build related cascade items")
   String buildTabName();
+  
+  @DefaultMessage("Build HTML Output")
+  @Description("Build HTML output files")
+  String buildHTMLOutputMenuItem();
   
   @DefaultMessage("App ( provide QR code for .apk )")
   @Description("Label of item for building a project and show barcode")

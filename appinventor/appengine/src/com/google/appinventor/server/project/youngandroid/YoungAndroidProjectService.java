@@ -585,8 +585,8 @@ public final class YoungAndroidProjectService extends CommonProjectService {
 
   
   // DEMO - This always returns "yes file is built" so client then downloads the html
-  public RpcResult getWebBuildResult(User user, long projectId) {
-	    String target = "web";
+  public RpcResult getWebBuildResult(User user, long projectId, String target) {
+	    target = "web";
 	    String userId = user.getUserId();
 	    //updateCurrentProgress(user, projectId, target);
 	    currentProgress = 100;

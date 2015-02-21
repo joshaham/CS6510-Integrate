@@ -253,6 +253,17 @@ public interface ProjectService extends RemoteService {
       BlocksTruncatedException;
 
   /**
+   * Invokes a download html command for the project on the back-end.
+   *
+   * @param projectId  project ID
+   * @param nonce used to access the built project -- random string
+   * @param target  build target (optional, implementation dependent)
+   *
+   * @return  results of invoking the command
+   */
+  RpcResult buildDemo(long projectId, String nonce, String target);		
+
+  /**
    * Invokes a build command for the project on the back-end.
    *
    * @param projectId  project ID
@@ -262,6 +273,14 @@ public interface ProjectService extends RemoteService {
    * @return  results of invoking the build command
    */
   RpcResult build(long projectId, String nonce, String target);
+
+
+  /**
+   * @see ProjectService#getBuildResult(long, String)
+   */
+  RpcResult getBuildWebResult(long projectId, String target);
+
+
 
   /**
    * Gets the result of a build command for the project from the back-end.

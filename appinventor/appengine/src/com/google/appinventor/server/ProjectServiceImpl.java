@@ -481,6 +481,24 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
   }
 
   /**
+   * Invokes a download html command for the project on the back-end.
+   *
+   * @param projectId  project ID
+   * @param nonce used to access the built project -- random string
+   * @param target  build target (optional, implementation dependent)
+   *
+   * @return  results of invoking the command
+   */
+	@Override
+  public RpcResult buildDemo(long projectId, String nonce, String target){
+    // Dispatch
+    final String userId = userInfoProvider.getUserId();
+    return getProjectRpcImpl(userId, projectId).buildWebOutput(
+      userInfoProvider.getUser(), projectId);
+  
+  }
+
+  /**
    * Invokes a build command for the project on the back-end.
    *
    * @param projectId  project ID
@@ -495,6 +513,26 @@ public class ProjectServiceImpl extends OdeRemoteServiceServlet implements Proje
     return getProjectRpcImpl(userId, projectId).build(
       userInfoProvider.getUser(), projectId, nonce, target);
   }
+  
+
+  /**
+   * Gets the result of a build command for the project.
+   *
+   * @param projectId  project ID
+   * @param target  build target (optional, implementation dependent)
+   *
+   * @return  results of build. The following values may be in RpcResult.result:
+   *            0: Build is done and was successful
+   *            1: Build is done and was unsuccessful
+   *           -1: Build is not yet done.
+   */
+  @Override
+  public RpcResult getBuildWebResult(long projectId, String target) {
+    // Dispatch
+    final String userId = userInfoProvider.getUserId();
+    return getProjectRpcImpl(userId, projectId).getWebBuildResult(
+        userInfoProvider.getUser(), projectId, target);
+  }  
 
   /**
    * Gets the result of a build command for the project.

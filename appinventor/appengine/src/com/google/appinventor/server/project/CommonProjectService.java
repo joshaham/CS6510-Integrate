@@ -296,7 +296,7 @@ public abstract class CommonProjectService {
   public abstract RpcResult getBuildResult(User user, long projectId, String target);
 
   // DEMO
-  public abstract RpcResult getWebBuildResult(User user, long projectId);
+  public abstract RpcResult getWebBuildResult(User user, long projectId, String target);
   
   public abstract RpcResult buildWebOutput(User user, long projectId);
 

@@ -139,12 +139,25 @@ public interface ProjectServiceAsync {
   /**
    * @see ProjectService#build(long, String, String)
    */
+  void  buildDemo(long projectId, String nonce, String target, AsyncCallback<RpcResult> callback);
+
+  /**
+   * @see ProjectService#build(long, String, String)
+   */
+
   void build(long projectId, String nonce, String target, AsyncCallback<RpcResult> callback);
 
   /**
    * @see ProjectService#getBuildResult(long, String)
    */
   void getBuildResult(long projectId, String target, AsyncCallback<RpcResult> callback);
+  
+
+  /**
+   * @see ProjectService#getBuildResult(long, String)
+   */
+  void getBuildWebResult(long projectId, String target, AsyncCallback<RpcResult> callback);
+
 
   /**
    * @see ProjectService#addFile(long, String)
