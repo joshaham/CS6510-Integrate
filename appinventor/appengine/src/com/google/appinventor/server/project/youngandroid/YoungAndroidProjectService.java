@@ -507,6 +507,7 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     String componentJSONFileId = null;
     String componentJSON = null;
     String componentJavaScript = null;  // ToDo: get this out of storage as well, once it's there
+    String componentJSFileId = null;  
     
     // Find component JSON file... 
     // (and log source files)
@@ -521,6 +522,11 @@ public final class YoungAndroidProjectService extends CommonProjectService {
           // DEMO TODO: This assumes there is only one screen 
           componentJSONFileId = srcFileId;
           componentJSON = fileContents;
+        }
+        if (srcFileId.endsWith(".yail"))
+        {
+        	componentJSFileId = srcFileId;
+        	componentJavaScript = fileContents;
         }
         else {
             LOG.info(srcFileId + ":  " + fileContents);        	
@@ -541,23 +547,11 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     	}
     }    
  
-
- 
     LOG.info(componentJSONFileId + ":  " + componentJSON); 
     
-
-    // Call the method to return an array of html strings for the components
-    //ArrayList<String> componentHtml = getComponentHtml(componentJSON);
-    
-    // Combine the shell with the component Html
-    // Do javascript too?
-    // TODO: Steve
-    // STEVE's METHOD ENDS HERE, add call below
-   String builtHtml = Shell.stitchBuildHTML("", componentJSON);
+   String builtHtml = Shell.stitchBuildHTML(componentJavaScript, componentJSON);
    
    LOG.info("DEMO: Built html = " + builtHtml);
-  
-  // = stevesMethod(componentJSON);
      
     // Save built file (add the id as an output file, then add the contents for that id)
     LOG.info("DEMO: Storing web output" + builtFileId);
