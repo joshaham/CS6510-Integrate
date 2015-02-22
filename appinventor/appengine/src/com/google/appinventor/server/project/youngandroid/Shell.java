@@ -7,49 +7,48 @@ import org.json.JSONException;
 
 public class Shell {
 
-  public String blocklyJavascript;				// this will actually be a string
-  public static ArrayList<String[]> componentPackage;	// component data format after parsing the data-store contents
-  public String componentHTML;					// this is a string
-  public String componentCSS;					// this is also a string and currently is not implemented
-  public String buildPageHTMLString;			// String for the output
-  public StringBuilder htmlStringBuilder;		// StringBuilder for building the page line-by-line
-  public Pattern componentJSONPattern;			// regular expression for use in processing the
-  												// data-store component JSON string.
-  public Matcher componentJSONMatcher;			// Matcher for parsing component JSON String.
-  public String strippedComponentJSON;			// component data after removing non-required characters
+	// this function will be called by "build" if we have all the data
+	public static String stitchBuildHTML(String blocklyJavascript, String componentJSON) {
 
-  
-  // this function will be called by "build" if we have all the data
-  private String stitchBuildHTML(String blocklyJavascript, String componentJSON) {
+		ArrayList<String[]> componentPackage;	// component data format after parsing the data-store contents
+		String componentHTML;					// this is a string
+		String componentCSS;					// this is also a string and currently is not implemented
+		String buildPageHTMLString;			// String for the output
+		StringBuilder htmlStringBuilder;		// StringBuilder for building the page line-by-line
+		Pattern componentJSONPattern;			// regular expression for use in processing the
+		// data-store component JSON string.
+		Matcher componentJSONMatcher;			// Matcher for parsing component JSON String.
+		String strippedComponentJSON;			// component data after removing non-required characters
 
-	this.blocklyJavascript = blocklyJavascript;		// set JS object
-	
-	// remove non-required characters and send component JSON for parsing
-    this.componentJSONPattern = Pattern.compile("([^{]+)([^|]+)(.*)");
-    this.componentJSONMatcher = componentJSONPattern.matcher(componentJSON);
-    boolean b = componentJSONMatcher.matches();					// exception found without this line. very strange.
-    this.strippedComponentJSON = componentJSONMatcher.group(2).trim();
-    
-    try {	
-    	this.componentPackage = Parse.parseJsonString(strippedComponentJSON);
-    }
-    catch (JSONException ex)
-    {
-    	ex.printStackTrace();
-    }
-    
-    this.htmlStringBuilder = null;  		// reset the HTML output string
-    this.buildPageHTMLString = null;  		// reset accumulator for HTML string
-    
-	// build the page sections
-	htmlStringBuilder.append("<!doctype html>\n");
-	htmlStringBuilder.append("<html lang='en'>\n");
-	htmlStringBuilder.append("<head>\n");
-	htmlStringBuilder.append("<meta charset='utf-8'>\n");
-	htmlStringBuilder.append("<title>My New AppInventor Web App</title>\n");
-	
-	// HARDCODED CSS FOR NOW
-/*	htmlStringBuilder.append("<style>\n");
+		componentPackage = new ArrayList<>() ;
+		//blocklyJavascript = blocklyJavascript;		// set JS object
+
+		// remove non-required characters and send component JSON for parsing
+		componentJSONPattern = Pattern.compile("([^{]+)([^|]+)(.*)");
+		componentJSONMatcher = componentJSONPattern.matcher(componentJSON);
+		boolean b = componentJSONMatcher.matches();					// exception found without this line. very strange.
+		strippedComponentJSON = componentJSONMatcher.group(2).trim();
+
+		try {	
+			componentPackage = Parse.parseJsonString(strippedComponentJSON);
+		}
+		catch (JSONException ex)
+		{
+			ex.printStackTrace();
+		}
+
+		htmlStringBuilder = new StringBuilder();  		// reset the HTML output string
+		buildPageHTMLString = null;  		// reset accumulator for HTML string
+
+		// build the page sections
+		htmlStringBuilder.append("<!doctype html>\n");
+		htmlStringBuilder.append("<html lang='en'>\n");
+		htmlStringBuilder.append("<head>\n");
+		htmlStringBuilder.append("<meta charset='utf-8'>\n");
+		htmlStringBuilder.append("<title>My New AppInventor Web App</title>\n");
+
+		// HARDCODED CSS FOR NOW
+		/*	htmlStringBuilder.append("<style>\n");
 	htmlStringBuilder.append("#Button1\n");
 	htmlStringBuilder.append("{\n");
 	htmlStringBuilder.append("background : #0000FF;\n");
@@ -64,9 +63,9 @@ public class Shell {
 	htmlStringBuilder.append("border-radius : 0px;\n");
 	htmlStringBuilder.append("text-align : left;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
-	
+
 	htmlStringBuilder.append("<style>\n");
 	htmlStringBuilder.append("#Button2\n");
 	htmlStringBuilder.append("{\n");
@@ -82,9 +81,9 @@ public class Shell {
 	htmlStringBuilder.append("border-radius : 0px;\n");
 	htmlStringBuilder.append("text-align : left;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
-	
+
 	htmlStringBuilder.append("#Label1\n");
 	htmlStringBuilder.append("{\n");
 	htmlStringBuilder.append("background : #0000FF;\n");
@@ -98,9 +97,9 @@ public class Shell {
 	htmlStringBuilder.append("height : 20px;\n");
 	htmlStringBuilder.append("border :none;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
-	
+
 	htmlStringBuilder.append("#TextBox1\n");
 	htmlStringBuilder.append("{\n");
 	htmlStringBuilder.append("background : #CCCCCC;\n");
@@ -113,7 +112,7 @@ public class Shell {
 	htmlStringBuilder.append("width : 100px;\n");
 	htmlStringBuilder.append("height : 20px;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
 
 	htmlStringBuilder.append("#TextBox2\n");
@@ -128,7 +127,7 @@ public class Shell {
 	htmlStringBuilder.append("width : auto;\n");
 	htmlStringBuilder.append("height : auto;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
 
 	htmlStringBuilder.append("#PasswordTextBox1\n");
@@ -143,9 +142,9 @@ public class Shell {
 	htmlStringBuilder.append("width : 100px;\n");
 	htmlStringBuilder.append("height : 20px;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
-	
+
 	htmlStringBuilder.append("#CheckBox1\n");
 	htmlStringBuilder.append("{\n");
 	htmlStringBuilder.append("background : #FFFFFF;\n");
@@ -157,9 +156,9 @@ public class Shell {
 	htmlStringBuilder.append("width : 100px;\n");
 	htmlStringBuilder.append("height : 20px;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
-	
+
 	htmlStringBuilder.append("#ListView1\n");
 	htmlStringBuilder.append("{\n");
 	htmlStringBuilder.append("background : #FFFFFF;\n");
@@ -168,9 +167,9 @@ public class Shell {
 	htmlStringBuilder.append("width : 100px;\n");
 	htmlStringBuilder.append("height : 20px;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("\n");
-	
+
 	htmlStringBuilder.append("#LabelPicker1\n");
 	htmlStringBuilder.append("{\n");
 	htmlStringBuilder.append("background : #FFFFFF;\n");
@@ -184,43 +183,43 @@ public class Shell {
 	htmlStringBuilder.append("height : auto;\n");
 	htmlStringBuilder.append("border-radius : 0px;\n");
 	htmlStringBuilder.append("}\n");
-	
+
 	htmlStringBuilder.append("</style>\n");
 	htmlStringBuilder.append("\n");
-*/	// HARDCODED CSS FOR NOW
+		 */	// HARDCODED CSS FOR NOW
 
-    // NON-HARDCODED CSS
-	if (!componentPackage.isEmpty()) {					// loop through the CSS lines if there are any.
-		htmlStringBuilder.append("<style>\n");
-		for (String[] component : componentPackage) {
-	      htmlStringBuilder.append(component[1] + "\n");
+		// NON-HARDCODED CSS
+		if (!componentPackage.isEmpty()) {					// loop through the CSS lines if there are any.
+			htmlStringBuilder.append("<style>\n");
+			for (String[] component : componentPackage) {
+				htmlStringBuilder.append(component[1] + "\n");
+			}
+			htmlStringBuilder.append("</style>\n");
+			htmlStringBuilder.append("\n");
 		}
-		htmlStringBuilder.append("</style>\n");
-		htmlStringBuilder.append("\n");
-	}
-    // NON-HARDCODED CSS
+		// NON-HARDCODED CSS
 
-	// HARDCODED JS FOR NOW
-/*	htmlStringBuilder.append("<script>\n");
+		// HARDCODED JS FOR NOW
+		/*	htmlStringBuilder.append("<script>\n");
 	htmlStringBuilder.append("window.onload = function(){\n");
 	htmlStringBuilder.append("document.getElementById('Button1').onclick = function(){\n");
 	htmlStringBuilder.append("document.getElementById('Button1').innerHTML = 'Hello World!';\n");
 	htmlStringBuilder.append("};\n");
 	htmlStringBuilder.append("};\n");
 	htmlStringBuilder.append("</script>\n");
-*/	// HARDCODED JS FOR NOW
-	
-	// NON-HARDCODED JS
-	htmlStringBuilder.append("<script>\n");
-	htmlStringBuilder.append(blocklyJavascript);
-	htmlStringBuilder.append("</script>\n");
-	// NON-HARDCODED JS
+		 */	// HARDCODED JS FOR NOW
 
-	htmlStringBuilder.append("</head>\n");
-	htmlStringBuilder.append("<body>\n");
+		// NON-HARDCODED JS
+		htmlStringBuilder.append("<script>\n");
+		htmlStringBuilder.append(blocklyJavascript);
+		htmlStringBuilder.append("</script>\n");
+		// NON-HARDCODED JS
 
-	// HARDCODED HTML FOR NOW
-/*	htmlStringBuilder.append("<button id='Button1' type='Button'>Demo Button</button>\n");
+		htmlStringBuilder.append("</head>\n");
+		htmlStringBuilder.append("<body>\n");
+
+		// HARDCODED HTML FOR NOW
+		/*	htmlStringBuilder.append("<button id='Button1' type='Button'>Demo Button</button>\n");
 	htmlStringBuilder.append("<button id='Button2' type='Button' disabled hidden>Demo Button2</button>\n");
 	htmlStringBuilder.append("<label id='Label1' type='Label'>TESTLABLE</label>\n");
 	htmlStringBuilder.append("<input id='TextBox1' type='TextBox' title= 'Hint TextBox1' value= 'test text'></input>\n");
@@ -229,22 +228,22 @@ public class Shell {
 	htmlStringBuilder.append("<input id='CheckBox1' type='checkbox'>Text fo</input>\n");
 	htmlStringBuilder.append("<ul id='ListView1'><li>1</li><li>2</li><li>3</li><li>4</li><li>5</li></ul>\n");
 	htmlStringBuilder.append("<label id='labelDatePicker1'>DatePicker text</label>  <input id='DatePicker1' type='date'/>\n");
-*/	// HARDCODED HTML FOR NOW
-	
-	// NON-HARDCODED HTML
-	if (!componentPackage.isEmpty()) {					// loop through the HTML lines if there are any.
-	  for (String[] component : componentPackage) {
-        htmlStringBuilder.append(component[0] + "\n");
-	  }
-	}
-	// NON-HARDCODED HTML
+		 */	// HARDCODED HTML FOR NOW
 
-	htmlStringBuilder.append("</body>\n");
-	htmlStringBuilder.append("</html>");
-	// end of page building
-    
-    this.buildPageHTMLString = htmlStringBuilder.toString();
-    return buildPageHTMLString;
-    
-  }
+		// NON-HARDCODED HTML
+		if (!componentPackage.isEmpty()) {					// loop through the HTML lines if there are any.
+			for (String[] component : componentPackage) {
+				htmlStringBuilder.append(component[0] + "\n");
+			}
+		}
+		// NON-HARDCODED HTML
+
+		htmlStringBuilder.append("</body>\n");
+		htmlStringBuilder.append("</html>");
+		// end of page building
+
+		buildPageHTMLString = htmlStringBuilder.toString();
+		return buildPageHTMLString;
+
+	}
 }

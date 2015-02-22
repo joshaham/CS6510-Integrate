@@ -539,28 +539,12 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     	if (buildOutputFile.equalsIgnoreCase(builtFileId)) {
     		storageIo.deleteFile(userId, projectId, buildOutputFile);
     	}
-    }
-        
-    // STEVE's METHOD STARTS HERE
-    // take this all and make it into a method, 
-    // passing in ComponentJSON (and javascript and blockly?) 
-    
-    // define the fixed html "shell"
-    String htmlShell = 
-    		"<!doctype html>" + 
-    		"<head>" +
-    "<meta charset=\"utf-8\">" +
-    "<title>" + projectName + "</title>" +  
-    "<head>" +
-    " <!-- JAVASCRIPT INSERT HERE -->" +
-    "</head>" +
-    "<body>" + 
-    " <!-- COMPONENT HTML INSERT HERE -->" +
-    "</body>" +
-    "</html>";
+    }    
+ 
 
  
-    LOG.info(componentJSONFileId + ":  " + componentJSON);        	
+    LOG.info(componentJSONFileId + ":  " + componentJSON); 
+    
 
     // Call the method to return an array of html strings for the components
     //ArrayList<String> componentHtml = getComponentHtml(componentJSON);
@@ -569,7 +553,11 @@ public final class YoungAndroidProjectService extends CommonProjectService {
     // Do javascript too?
     // TODO: Steve
     // STEVE's METHOD ENDS HERE, add call below
-   String builtHtml = htmlShell;  // = stevesMethod(componentJSON);
+   String builtHtml = Shell.stitchBuildHTML("", componentJSON);
+   
+   LOG.info("DEMO: Built html = " + builtHtml);
+  
+  // = stevesMethod(componentJSON);
      
     // Save built file (add the id as an output file, then add the contents for that id)
     LOG.info("DEMO: Storing web output" + builtFileId);
