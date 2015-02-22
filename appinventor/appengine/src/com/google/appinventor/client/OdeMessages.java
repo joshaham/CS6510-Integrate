@@ -18,10 +18,10 @@ import com.google.gwt.i18n.client.Messages;
 public interface OdeMessages extends Messages {
   // Used in multiple files
 
-  @DefaultMessage("TO JAVASCRIPT")
-  @Description("HOPEFULLY THIS MAKES JAVASCRIPT")
+  @DefaultMessage("Generate Javascript")
+  @Description("Label of the cascade item for generating Javascript for a project")
   String toJavaScript();
-	
+	 
   @DefaultMessage("Cancel")
   @Description("Text on \"Cancel\" button.")
   String cancelButton();
@@ -491,6 +491,15 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Emulator")
   @Description("Message providing details about starting the emulator connection.")
   String emulatorMenuItem();
+  
+  //Used in TopToolbar.java
+  @DefaultMessage("Live Web App")
+  @Description("Live Web App option")
+  String webAppMenuItem();
+  
+  @DefaultMessage("Server error: web app upload failed!")
+  @Description("Error message reported when the web app upload fails")
+  String webAppUploadError();
 
   @DefaultMessage("Report an Issue")
   @Description("Link for Report an Issue form")
@@ -519,15 +528,15 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("USB")
   @Description("Message providing details about starting a USB connection.")
   String usbMenuItem();
-  
-  @DefaultMessage("Live Edit")
-  @Description("Live edit the app")
-  String liveEditMenuItem();
 
   @DefaultMessage("Reset Connection")
   @Description("Reset all connections.")
   String resetConnectionsMenuItem();
 
+  @DefaultMessage("Build HTML Output")
+  @Description("Build HTML output files")
+  String buildHTMLOutputMenuItem();
+  
   @DefaultMessage("Hard Reset")
   @Description("Hard Reset the Emulator.")
   String hardResetConnectionsMenuItem();
@@ -536,10 +545,6 @@ public interface OdeMessages extends Messages {
   @DefaultMessage("Build")
   @Description("Label of the button leading to build related cascade items")
   String buildTabName();
-  
-  @DefaultMessage("Build HTML Output")
-  @Description("Build HTML output files")
-  String buildHTMLOutputMenuItem();
   
   @DefaultMessage("App ( provide QR code for .apk )")
   @Description("Label of item for building a project and show barcode")

@@ -40,8 +40,11 @@ import com.google.appinventor.components.common.YaVersion;
 import com.google.appinventor.shared.rpc.ServerLayout;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
+import com.google.appinventor.shared.rpc.webapp.WebAppUploadService;
+import com.google.appinventor.shared.rpc.webapp.WebAppUploadServiceAsync;
 import com.google.appinventor.shared.storage.StorageUtil;
 import com.google.common.collect.Lists;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.user.client.Command;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.Window.Location;
@@ -57,6 +60,9 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.Widget;
 
 import java.util.List;
+import java.io.OutputStreamWriter;
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 import static com.google.appinventor.client.Ode.MESSAGES;
 
@@ -95,7 +101,7 @@ public class TopToolbar extends Composite {
   private static final String WIDGET_NAME_WIRELESS_BUTTON = "Wireless";
   private static final String WIDGET_NAME_EMULATOR_BUTTON = "Emulator";
   private static final String WIDGET_NAME_USB_BUTTON = "Usb";
-  private static final String WIDGET_NAME_LIVEEDIT_BUTTON = "LiveEdit";
+  private static final String WIDGET_NAME_WEB_APP_BUTTON = "Live Web App";
   private static final String WIDGET_NAME_RESET_BUTTON = "Reset";
   private static final String WIDGET_NAME_HARDRESET_BUTTON = "HardReset";
   private static final String WIDGET_NAME_PROJECT = "Project";
@@ -116,7 +122,6 @@ public class TopToolbar extends Composite {
   private static final String WIDGET_NAME_ADMIN = "Admin";
   private static final String WIDGET_NAME_DOWNLOAD_USER_SOURCE = "DownloadUserSource";
   private static final String WIDGET_NAME_SWITCH_TO_DEBUG = "SwitchToDebugPane";
-
   private static final String WIDGET_NAME_GENERATE_JAVASCRIPT = "GenerateJavaScript";
   
   public DropDownButton fileDropDown;
@@ -179,17 +184,19 @@ public class TopToolbar extends Composite {
         MESSAGES.emulatorMenuItem(), new EmulatorAction()));
     connectItems.add(new DropDownItem(WIDGET_NAME_USB_BUTTON, MESSAGES.usbMenuItem(),
         new UsbAction()));
-	 connectItems.add(new DropDownItem(WIDGET_NAME_LIVEEDIT_BUTTON, MESSAGES.liveEditMenuItem(),
-	     new LiveEditAction()));
+    connectItems.add(new DropDownItem(WIDGET_NAME_WEB_APP_BUTTON, MESSAGES.webAppMenuItem(),
+        new webAppAction()));
     connectItems.add(null);
     connectItems.add(new DropDownItem(WIDGET_NAME_RESET_BUTTON, MESSAGES.resetConnectionsMenuItem(),
         new ResetAction()));
     connectItems.add(new DropDownItem(WIDGET_NAME_HARDRESET_BUTTON, MESSAGES.hardResetConnectionsMenuItem(),
         new HardResetAction()));
 
+    // Demo...
+    buildItems.add(new DropDownItem(WIDGET_NAME_BUILD_HTML_OUTPUT, MESSAGES.buildHTMLOutputMenuItem(),
+   	     new HTMLOutputAction()));
+    
     // Build -> {Show Barcode; Download to Computer; Generate YAIL only when logged in as an admin}
-	 buildItems.add(new DropDownItem(WIDGET_NAME_BUILD_HTML_OUTPUT, MESSAGES.buildHTMLOutputMenuItem(),
-	     new HTMLOutputAction()));
     buildItems.add(new DropDownItem(WIDGET_NAME_BUILD_BARCODE, MESSAGES.showBarcodeMenuItem(),
         new BarcodeAction()));
     buildItems.add(new DropDownItem(WIDGET_NAME_BUILD_DOWNLOAD, MESSAGES.downloadToComputerMenuItem(),
@@ -201,7 +208,7 @@ public class TopToolbar extends Composite {
     }
     buildItems.add(new DropDownItem(WIDGET_NAME_GENERATE_JAVASCRIPT, MESSAGES.toJavaScript(),
     		new GenerateJavaScriptAction()));
-
+    
     // Help -> {About, Library, Get Started, Tutorials, Troubleshooting, Forums, Report an Issue}
     helpItems.add(new DropDownItem(WIDGET_NAME_ABOUT, MESSAGES.aboutMenuItem(),
         new AboutAction()));
@@ -324,7 +331,7 @@ public class TopToolbar extends Composite {
     @Override
     public void execute() {
       if (Ode.getInstance().okToConnect()) {
-        startRepl(true, false, false, false); // false means we are
+        startRepl(true, false, false); // false means we are
                                        // *not* the emulator
       }
     }
@@ -334,7 +341,7 @@ public class TopToolbar extends Composite {
     @Override
     public void execute() {
       if (Ode.getInstance().okToConnect()) {
-        startRepl(true, true, false, false); // true means we are the
+        startRepl(true, true, false); // true means we are the
                                       // emulator
       }
     }
@@ -344,16 +351,48 @@ public class TopToolbar extends Composite {
     @Override
     public void execute() {
       if (Ode.getInstance().okToConnect()) {
-        startRepl(true, false, true, false);
+        startRepl(true, false, true);
       }
     }
   }
 
-  private class LiveEditAction implements Command {
+  private class webAppAction implements Command {
+    private void doWebAppUpload(String fileName, String fileData) {
+      final AsyncCallback<Void> callback = new AsyncCallback<Void>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          OdeLog.log(MESSAGES.webAppUploadError());
+        }
+        @Override
+        public void onSuccess(Void msg) {
+          //OdeLog.log("=====SUCCESS=====");
+        }
+      };
+      Ode.getInstance().getWebAppUploadService().uploadFile(fileName, fileData, callback);
+    }
+
+    private String generateTestHtml() {
+      HTML fileData = new HTML(" <!DOCTYPE html>\n" +
+              "<html>\n" +
+              "<head>\n" +
+              "  <title>Testing Web App Launch</title>\n" +
+              "</head>\n" +
+              "<body>\n" +
+                "<div>\n" +
+                  "<img src='http://images.clipartpanda.com/smiley-face-thumbs-up-cartoon-smiley-fac1.jpg'/>\n" +
+                "</div>\n" +
+                "<h1> This is a page</h1>\n" +
+              "</body>\n" +
+              "</html>");
+      return fileData.getHTML();
+    }
+
     @Override
     public void execute() {
+      String fileName = "test.html";
       if (Ode.getInstance().okToConnect()) {
-        startRepl(true, false, true, false);
+        doWebAppUpload(fileName, generateTestHtml());
+        Window.open(ServerLayout.genRelativeWebAppLaunchPath(fileName), "test", "scrollbars=1");
       }
     }
   }
@@ -362,7 +401,7 @@ public class TopToolbar extends Composite {
     @Override
     public void execute() {
       if (Ode.getInstance().okToConnect()) {
-        startRepl(false, false, false, false); // We are really stopping the repl here
+        startRepl(false, false, false); // We are really stopping the repl here
       }
     }
   }
@@ -375,31 +414,33 @@ public class TopToolbar extends Composite {
       }
     }
   }
- 
-   public class HTMLOutputAction implements Command {
-    @Override
-    public void execute() {
-      ProjectRootNode projectRootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
-      if (projectRootNode != null) {
-        String target = YoungAndroidProjectNode.YOUNG_ANDROID_TARGET_ANDROID;
-        ChainableCommand cmd = new SaveAllEditorsCommand(
-            new GenerateYailCommand(
-                new BuildWebCommand(target,
-                    new ShowProgressBarCommand(target,
-                        new WaitForBuildWebResultCommand(target,
-                            new DownloadWebOutputCommand(target)), "DownloadAction"))));
-//        updateBuildButton(true);
-        cmd.startExecuteChain(Tracking.PROJECT_ACTION_BUILD_DOWNLOAD_YA, projectRootNode,
-            new Command() {
-              @Override
-              public void execute() {
-//                updateBuildButton(false);
-              }
-            });
-      }
-    }
-  }
 
+  public class HTMLOutputAction implements Command {
+	    @Override
+	    public void execute() {
+	      ProjectRootNode projectRootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
+	      if (projectRootNode != null) {
+	        String target = YoungAndroidProjectNode.YOUNG_ANDROID_TARGET_ANDROID;
+	        ChainableCommand cmd = new SaveAllEditorsCommand(
+	            new GenerateYailCommand(
+	                new BuildWebCommand(target,
+	                		new DownloadWebOutputCommand(target))));
+	                     /* new ShowProgressBarCommand(target,
+	                        new WaitForBuildWebResultCommand(target,
+	                            new DownloadWebOutputCommand(target)), "DownloadAction"))  )); */
+//	        updateBuildButton(true);
+	        cmd.startExecuteChain(Tracking.PROJECT_ACTION_BUILD_DOWNLOAD_YA, projectRootNode,
+	            new Command() {
+	              @Override
+	              public void execute() {
+//	                updateBuildButton(false);
+	              }
+	            });
+	      }
+	    }
+	  }
+
+  
   private class BarcodeAction implements Command {
     @Override
     public void execute() {
@@ -447,6 +488,7 @@ public class TopToolbar extends Composite {
       }
     }
   }
+  
   private static class ExportProjectAction implements Command {
     @Override
     public void execute() {
@@ -685,29 +727,25 @@ public class TopToolbar extends Composite {
       }
     }
   }
-
-
+  
   private class GenerateJavaScriptAction implements Command {
-    @Override
-    public void execute() {
-      ProjectRootNode projectRootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
-      if (projectRootNode != null) {
-        String target = YoungAndroidProjectNode.YOUNG_ANDROID_TARGET_ANDROID;
-        ChainableCommand cmd = new SaveAllEditorsCommand(new GenerateJavaScriptCommand(null));
-        //updateBuildButton(true);
-        cmd.startExecuteChain(Tracking.PROJECT_ACTION_BUILD_YAIL_YA, projectRootNode,
-            new Command() {
-              @Override
-              public void execute() {
-                //updateBuildButton(false);
-              }
-            });
-      }
-    }
-  }
-
-
-
+	    @Override
+	    public void execute() {
+	      ProjectRootNode projectRootNode = Ode.getInstance().getCurrentYoungAndroidProjectRootNode();
+	      if (projectRootNode != null) {
+	        String target = YoungAndroidProjectNode.YOUNG_ANDROID_TARGET_ANDROID;
+	        ChainableCommand cmd = new SaveAllEditorsCommand(new GenerateJavaScriptCommand(null));
+	        //updateBuildButton(true);
+	        cmd.startExecuteChain(Tracking.PROJECT_ACTION_BUILD_YAIL_YA, projectRootNode,
+	            new Command() {
+	              @Override
+	              public void execute() {
+	                //updateBuildButton(false);
+	              }
+	            });
+	      }
+	    }
+	  }
 
   private static class AboutAction implements Command {
     @Override
@@ -826,18 +864,15 @@ public class TopToolbar extends Composite {
     }
   }
 
-  private void updateConnectToDropDownButton(boolean isEmulatorRunning, boolean isCompanionRunning, boolean isUsbRunning,
-   boolean isLiveEditRunning){
-    if (!isEmulatorRunning && !isCompanionRunning && !isUsbRunning && !isLiveEditRunning) {
+  private void updateConnectToDropDownButton(boolean isEmulatorRunning, boolean isCompanionRunning, boolean isUsbRunning){
+    if (!isEmulatorRunning && !isCompanionRunning && !isUsbRunning) {
       connectDropDown.setItemEnabled(MESSAGES.AICompanionMenuItem(), true);
       connectDropDown.setItemEnabled(MESSAGES.emulatorMenuItem(), true);
       connectDropDown.setItemEnabled(MESSAGES.usbMenuItem(), true);
-		connectDropDown.setItemEnabled(MESSAGES.liveEditMenuItem(), true);
     } else {
       connectDropDown.setItemEnabled(MESSAGES.AICompanionMenuItem(), false);
       connectDropDown.setItemEnabled(MESSAGES.emulatorMenuItem(), false);
       connectDropDown.setItemEnabled(MESSAGES.usbMenuItem(), false);
-		connectDropDown.setItemEnabled(MESSAGES.liveEditMenuItem(), false);
     }
   }
 
@@ -847,7 +882,7 @@ public class TopToolbar extends Composite {
    */
   public static void indicateDisconnect() {
     TopToolbar instance = Ode.getInstance().getTopToolbar();
-    instance.updateConnectToDropDownButton(false, false, false, false);
+    instance.updateConnectToDropDownButton(false, false, false);
   }
 
   /**
@@ -861,7 +896,7 @@ public class TopToolbar extends Composite {
    * via Wireless.
    */
 
-  private void startRepl(boolean start, boolean forEmulator, boolean forUsb, boolean forCompanion) {
+  private void startRepl(boolean start, boolean forEmulator, boolean forUsb) {
     DesignToolbar.DesignProject currentProject = Ode.getInstance().getDesignToolbar().getCurrentProject();
     if (currentProject == null) {
       OdeLog.wlog("DesignToolbar.currentProject is null. "
@@ -872,16 +907,14 @@ public class TopToolbar extends Composite {
     screen.blocksEditor.startRepl(!start, forEmulator, forUsb);
     if (start) {
       if (forEmulator) {        // We are starting the emulator...
-        updateConnectToDropDownButton(true, false, false, false);
+        updateConnectToDropDownButton(true, false, false);
       } else if (forUsb) {      // We are starting the usb connection
-        updateConnectToDropDownButton(false, false, true, false);
-      } else if (forCompanion) {                  // We are connecting via wifi to a Companion
-        updateConnectToDropDownButton(false, true, false, false);
-      } else{ //We are starting live edit
-		  updateConnectToDropDownButton(false, false, false, true);
-		 }
+        updateConnectToDropDownButton(false, false, true);
+      } else {                  // We are connecting via wifi to a Companion
+        updateConnectToDropDownButton(false, true, false);
+      }
     } else {
-      updateConnectToDropDownButton(false, false, false, false);
+      updateConnectToDropDownButton(false, false, false);
     }
   }
 
@@ -894,7 +927,7 @@ public class TopToolbar extends Composite {
     }
     DesignToolbar.Screen screen = currentProject.screens.get(currentProject.currentScreen);
     ((YaBlocksEditor)screen.blocksEditor).hardReset();
-    updateConnectToDropDownButton(false, false, false, false);
+    updateConnectToDropDownButton(false, false, false);
   }
 
   /**
@@ -963,5 +996,4 @@ public class TopToolbar extends Composite {
       Ode.getInstance().switchToDebuggingView();
     }
   }
-
 }

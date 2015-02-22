@@ -73,6 +73,8 @@ import com.google.appinventor.shared.rpc.user.Config;
 import com.google.appinventor.shared.rpc.user.User;
 import com.google.appinventor.shared.rpc.user.UserInfoService;
 import com.google.appinventor.shared.rpc.user.UserInfoServiceAsync;
+import com.google.appinventor.shared.rpc.webapp.WebAppUploadService;
+import com.google.appinventor.shared.rpc.webapp.WebAppUploadServiceAsync;
 import com.google.appinventor.shared.settings.SettingsConstants;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
@@ -244,6 +246,9 @@ public class Ode implements EntryPoint {
   // Web service for get motd information
   private final GetMotdServiceAsync getMotdService = GWT.create(GetMotdService.class);
 
+  // Web service for Web app uploads
+  private final WebAppUploadServiceAsync webAppUploadService = GWT.create(WebAppUploadService.class);
+  
   private boolean windowClosing;
 
   private boolean screensLocked;
@@ -1165,6 +1170,15 @@ public class Ode implements EntryPoint {
   public LaunchServiceAsync getLaunchService() {
     return launchService;
   }
+  
+  /**
+   * Get an instance of the Web app upload RPC service.
+   *
+   * @return web app upload service instance
+   */
+   public WebAppUploadServiceAsync getWebAppUploadService() {
+     return webAppUploadService;
+   }
 
   /**
    * Set the current file editor.

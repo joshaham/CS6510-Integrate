@@ -97,18 +97,16 @@ public class ServerLayout {
    */
   public static final String DOWNLOAD_SERVLET_BASE = "download/";
 
+  /* DEMO */ 
+  public static final String DOWNLOAD_WEB_OUTPUT = "web-output"; 
+  /* END DEMO */ 
+
   /**
    * Relative path within {@link com.google.appinventor.server.DownloadServlet}
    * for downloading a project's output
    */
   public static final String DOWNLOAD_PROJECT_OUTPUT = "project-output";
-  
-  
-    /* DEMO */
-  public static final String DOWNLOAD_WEB_OUTPUT = "web-output";
-    /* END DEMO */
-    
-    
+
   /**
    * Relative path within {@link com.google.appinventor.server.DownloadServlet}
    * for downloading a project's sources
@@ -140,6 +138,24 @@ public class ServerLayout {
    */
   public static final String DOWNLOAD_USERFILE = "userfile";
 
+  /**
+   * Relative path of the
+   * {@link com.google.appinventor.shared.rpc.webapp.WebAppUploadService} within
+   * the ODE GWT module.     */
+  public static final String WEBAPP_UPLOAD_SERVICE = "webapp_upload";
+
+  /**
+     * Relative path of the {@link com.google.appinventor.server.WebAppLaunchServlet}
+     * within the ODE GWT module.
+     */
+    public static final String WEBAPP_SERVLET_BASE = "webapp_launch";  
+
+  /**
+     * Relative path of the {@link com.google.appinventor.server.WebAppLaunchServlet}
+     * for uploading a webapp file.
+     */
+  public static final String WEBAPP_FILE = "webapp";
+  
   /**
    * Relative path of the {@link com.google.appinventor.server.UploadServlet}
    * within the ODE GWT module.
@@ -218,6 +234,13 @@ public class ServerLayout {
    */
   public static final String UPLOAD_USERFILE_FORM_ELEMENT = "uploadUserFile";
 
+  /**
+   * Generate Web app launch relative path
+   */
+  public static String genRelativeWebAppLaunchPath(String target) {
+    return WEBAPP_SERVLET_BASE + "/" + WEBAPP_FILE + "/" + target;
+  }
+  
   public static String genRelativeDownloadPath(long projectId, String target) {
     return DOWNLOAD_SERVLET_BASE + DOWNLOAD_PROJECT_OUTPUT + "/" + projectId + "/" + target;
   }

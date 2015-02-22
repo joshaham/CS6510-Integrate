@@ -262,6 +262,34 @@
     <servlet-name>launchService</servlet-name>
   </filter-mapping>
 
+<!-- web app upload rpc service -->
+  <servlet>
+    <servlet-name>webAppUploadService</servlet-name>
+    <servlet-class>com.google.appinventor.server.WebAppUploadServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>webAppUploadService</servlet-name>
+    <url-pattern>/ode/webapp_upload/*</url-pattern>
+  </servlet-mapping>
+  <filter-mapping>
+    <filter-name>odeAuthFilter</filter-name>
+    <servlet-name>webAppUploadService</servlet-name>
+  </filter-mapping>
+
+  <!-- web app launch servlet -->
+  <servlet>
+    <servlet-name>webAppLaunchServlet</servlet-name>
+    <servlet-class>com.google.appinventor.server.WebAppLaunchServlet</servlet-class>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>webAppLaunchServlet</servlet-name>
+    <url-pattern>/ode/webapp_launch/*</url-pattern>
+  </servlet-mapping>
+  <filter-mapping>
+    <filter-name>odeAuthFilter</filter-name>
+    <servlet-name>webAppLaunchServlet</servlet-name>
+  </filter-mapping>
+
   <!-- accept tos -->
   <servlet>
     <servlet-name>tosServlet</servlet-name>
