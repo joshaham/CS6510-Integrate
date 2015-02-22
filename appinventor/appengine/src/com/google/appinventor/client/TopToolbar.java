@@ -37,7 +37,10 @@ import com.google.appinventor.client.wizards.youngandroid.NewYoungAndroidProject
 import com.google.appinventor.common.version.AppInventorFeatures;
 import com.google.appinventor.common.version.GitBuildId;
 import com.google.appinventor.components.common.YaVersion;
+import com.google.appinventor.shared.rpc.RpcResult;
 import com.google.appinventor.shared.rpc.ServerLayout;
+import com.google.appinventor.shared.rpc.project.ChecksumedFileException;
+import com.google.appinventor.shared.rpc.project.ChecksumedLoadFile;
 import com.google.appinventor.shared.rpc.project.ProjectRootNode;
 import com.google.appinventor.shared.rpc.project.youngandroid.YoungAndroidProjectNode;
 import com.google.appinventor.shared.rpc.webapp.WebAppUploadService;
@@ -357,6 +360,8 @@ public class TopToolbar extends Composite {
   }
 
   private class webAppAction implements Command {
+
+    // This loads html to the live web app servlet
     private void doWebAppUpload(String fileName, String fileData) {
       final AsyncCallback<Void> callback = new AsyncCallback<Void>() {
         @Override
@@ -365,33 +370,72 @@ public class TopToolbar extends Composite {
         }
         @Override
         public void onSuccess(Void msg) {
-          //OdeLog.log("=====SUCCESS=====");
+          OdeLog.log("Built html loaded as live web app");
         }
       };
       Ode.getInstance().getWebAppUploadService().uploadFile(fileName, fileData, callback);
     }
 
-    private String generateTestHtml() {
-      HTML fileData = new HTML(" <!DOCTYPE html>\n" +
-              "<html>\n" +
-              "<head>\n" +
-              "  <title>Testing Web App Launch</title>\n" +
-              "</head>\n" +
-              "<body>\n" +
-                "<div>\n" +
-                  "<img src='http://images.clipartpanda.com/smiley-face-thumbs-up-cartoon-smiley-fac1.jpg'/>\n" +
-                "</div>\n" +
-                "<h1> This is a page</h1>\n" +
-              "</body>\n" +
-              "</html>");
-      return fileData.getHTML();
+    // This builds the html for the app, and then on success, 
+    // gets the built html and loads it to the web app upload servlet
+    private void buildHtmlAndLoad()
+    {     	
+      final AsyncCallback<RpcResult> buildCallback = new AsyncCallback<RpcResult>() {
+        @Override
+        public void onFailure(Throwable caught) {
+          OdeLog.log("Error building for live edit");
+        }
+        @Override
+        public void onSuccess(RpcResult result) {
+          OdeLog.log("Build done for live edit");
+
+          // Now get the html and load it
+          getHtmlAndLoad(Ode.getInstance().getCurrentYoungAndroidProjectId());
+        }
+      };  
+
+      String nonce = Ode.getInstance().generateNonce();  
+      Ode.getInstance().getProjectService().buildDemo(Ode.getInstance().getCurrentYoungAndroidProjectId(), nonce, "web", buildCallback);    	
+    }
+
+    private void getHtmlAndLoad(long projectId) {
+      final String builtHtmlFileId = "build/web/demopage.html";  // hardcoded for now, matches build web output file
+
+      // Might not need the checksumed load here
+      OdeAsyncCallback<ChecksumedLoadFile> callback = new OdeAsyncCallback<ChecksumedLoadFile>(MESSAGES.loadError()) {
+        @Override
+        public void onSuccess(ChecksumedLoadFile result) {
+          // We built successfully...
+          try {
+            String fileContents = result.getContent();
+            OdeLog.log("Built html file contents loaded, size = " + fileContents.length());
+
+            // upload the file contents here...
+            doWebAppUpload("livewebapp.html", fileContents);  // needs to match webupload file
+          } catch (ChecksumedFileException e) {
+
+            OdeLog.log("Could not load file for live edit");                
+          }             
+        }
+        @Override
+        public void onFailure(Throwable caught) {
+          // Note that in this case, we will load the default html = "can't load"
+          OdeLog.log("Could not download html file");
+        }
+      };
+      Ode.getInstance().getProjectService().load2(projectId, builtHtmlFileId, callback);
     }
 
     @Override
     public void execute() {
-      String fileName = "test.html";
+
+      final String fileName = "livewebapp.html";
       if (Ode.getInstance().okToConnect()) {
-        doWebAppUpload(fileName, generateTestHtml());
+
+        buildHtmlAndLoad();
+
+        // todo - is the callback for the web app upload guaranteed to finish before this
+        // (have a feeling this is a problem)
         Window.open(ServerLayout.genRelativeWebAppLaunchPath(fileName), "test", "scrollbars=1");
       }
     }
