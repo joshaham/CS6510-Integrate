@@ -422,7 +422,7 @@ public class TopToolbar extends Composite {
 	      if (projectRootNode != null) {
 	        String target = YoungAndroidProjectNode.YOUNG_ANDROID_TARGET_ANDROID;
 	        ChainableCommand cmd = new SaveAllEditorsCommand(
-	            new GenerateYailCommand(
+	            new GenerateJavaScriptCommand(
 	                new BuildWebCommand(target,
 	                		new DownloadWebOutputCommand(target))));
 	                     /* new ShowProgressBarCommand(target,
