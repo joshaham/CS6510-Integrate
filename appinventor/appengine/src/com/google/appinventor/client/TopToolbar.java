@@ -396,8 +396,13 @@ public class TopToolbar extends Composite {
         }
       };  
 
-      String nonce = Ode.getInstance().generateNonce();  
-      Ode.getInstance().getProjectService().buildDemo(Ode.getInstance().getCurrentYoungAndroidProjectId(), nonce, "web", buildCallback);    	
+      String nonce = Ode.getInstance().generateNonce();
+        final Ode ode = Ode.getInstance();
+        ode.lockScreens(true);      // Lock out screen switching
+        ode.getEditorManager().saveDirtyEditors(null);
+        ode.lockScreens(false); // Screen switch OK now
+        Ode.getInstance().getEditorManager().generateJavaScriptForBlocksEditors(null, null);
+        Ode.getInstance().getProjectService().buildDemo(Ode.getInstance().getCurrentYoungAndroidProjectId(), nonce, "web", buildCallback);
     }
 
     private void getHtmlAndLoad(long projectId) {
@@ -430,18 +435,12 @@ public class TopToolbar extends Composite {
 
     @Override
     public void execute() {
-
-        
         
       final String fileName = "livewebapp.html";
       if (Ode.getInstance().okToConnect()) {
 
-          
-          
-
         buildHtmlAndLoad();
           
-        
       }
     }
   }
