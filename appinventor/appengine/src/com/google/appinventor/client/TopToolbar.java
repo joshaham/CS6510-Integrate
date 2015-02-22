@@ -362,7 +362,7 @@ public class TopToolbar extends Composite {
   private class webAppAction implements Command {
 
     // This loads html to the live web app servlet
-    private void doWebAppUpload(String fileName, String fileData) {
+    private void doWebAppUpload(final String fileName, String fileData) {
       final AsyncCallback<Void> callback = new AsyncCallback<Void>() {
         @Override
         public void onFailure(Throwable caught) {
@@ -370,7 +370,9 @@ public class TopToolbar extends Composite {
         }
         @Override
         public void onSuccess(Void msg) {
-          OdeLog.log("Built html loaded as live web app");
+            OdeLog.log("Built html loaded as live web app");
+            Window.open(ServerLayout.genRelativeWebAppLaunchPath(fileName), "test", "scrollbars=1");
+            
         }
       };
       Ode.getInstance().getWebAppUploadService().uploadFile(fileName, fileData, callback);
@@ -429,14 +431,17 @@ public class TopToolbar extends Composite {
     @Override
     public void execute() {
 
+        
+        
       final String fileName = "livewebapp.html";
       if (Ode.getInstance().okToConnect()) {
 
-        buildHtmlAndLoad();
+          
+          
 
-        // todo - is the callback for the web app upload guaranteed to finish before this
-        // (have a feeling this is a problem)
-        Window.open(ServerLayout.genRelativeWebAppLaunchPath(fileName), "test", "scrollbars=1");
+        buildHtmlAndLoad();
+          
+        
       }
     }
   }
