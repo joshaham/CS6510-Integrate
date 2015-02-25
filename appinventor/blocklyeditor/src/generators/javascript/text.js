@@ -1,257 +1,306 @@
-/**
- * @license
- * Visual Blocks Language
- *
- * Copyright 2012 Google Inc.
- * https://developers.google.com/blockly/
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// -*- mode: java; c-basic-offset: 2; -*-
+// Copyright 2012 Massachusetts Institute of Technology. All rights reserved.
 
 /**
- * @fileoverview Generating JavaScript for text blocks.
- * @author fraser@google.com (Neil Fraser)
+ * @license
+ * @fileoverview Color blocks yail generators for Blockly, modified for MIT App Inventor.
+ * @author mckinney@mit.edu (Andrew F. McKinney)
  */
+
 'use strict';
 
 goog.provide('Blockly.JavaScript.text');
 
-goog.require('Blockly.JavaScript');
-
-
-Blockly.JavaScript['text'] = function(block) {
+Blockly.JavaScript['text'] = function() {
   // Text value.
-  var code = Blockly.JavaScript.quote_(block.getFieldValue('TEXT'));
+  var code = Blockly.JavaScript.quote_(this.getFieldValue('TEXT'));
   return [code, Blockly.JavaScript.ORDER_ATOMIC];
 };
 
-Blockly.JavaScript['text_join'] = function(block) {
-  // Create a string made up of any number of elements of any type.
-  var code;
-  if (block.itemCount_ == 0) {
-    return ['\'\'', Blockly.JavaScript.ORDER_ATOMIC];
-  } else if (block.itemCount_ == 1) {
-    var argument0 = Blockly.JavaScript.valueToCode(block, 'ADD0',
-        Blockly.JavaScript.ORDER_NONE) || '\'\'';
-    code = 'String(' + argument0 + ')';
-    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-  } else if (block.itemCount_ == 2) {
-    var argument0 = Blockly.JavaScript.valueToCode(block, 'ADD0',
-        Blockly.JavaScript.ORDER_NONE) || '\'\'';
-    var argument1 = Blockly.JavaScript.valueToCode(block, 'ADD1',
-        Blockly.JavaScript.ORDER_NONE) || '\'\'';
-    code = 'String(' + argument0 + ') + String(' + argument1 + ')';
-    return [code, Blockly.JavaScript.ORDER_ADDITION];
-  } else {
-    code = new Array(block.itemCount_);
-    for (var n = 0; n < block.itemCount_; n++) {
-      code[n] = Blockly.JavaScript.valueToCode(block, 'ADD' + n,
-          Blockly.JavaScript.ORDER_COMMA) || '\'\'';
-    }
-    code = '[' + code.join(',') + '].join(\'\')';
-    return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+Blockly.JavaScript['text_join'] = function() {
+  // Create a string made up of elements of any type..
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-append"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER;
+
+  for(var i=0;i<this.itemCount_;i++) {
+    var argument = Blockly.JavaScript.valueToCode(this, 'ADD' + i, Blockly.JavaScript.ORDER_NONE) || "\"\"";
+    code += argument + Blockly.JavaScript.YAIL_SPACER;
   }
+  code += Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION;
+  for(var i=0;i<this.itemCount_;i++) {
+    code += "text" + Blockly.JavaScript.YAIL_SPACER;
+  }
+  code += Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "join"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
 };
 
-Blockly.JavaScript['text_append'] = function(block) {
-  // Append to a variable in place.
-  var varName = Blockly.JavaScript.variableDB_.getName(
-      block.getFieldValue('VAR'), Blockly.Variables.NAME_TYPE);
-  var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT',
-      Blockly.JavaScript.ORDER_NONE) || '\'\'';
-  return varName + ' = String(' + varName + ') + String(' + argument0 + ');\n';
+Blockly.JavaScript['text_length'] = function() {
+  // // String length
+  var argument = Blockly.JavaScript.valueToCode(this, 'VALUE', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-length"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "length"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
 };
 
-Blockly.JavaScript['text_length'] = function(block) {
-  // String length.
-  var argument0 = Blockly.JavaScript.valueToCode(block, 'VALUE',
-      Blockly.JavaScript.ORDER_FUNCTION_CALL) || '\'\'';
-  return [argument0 + '.length', Blockly.JavaScript.ORDER_MEMBER];
-};
-
-Blockly.JavaScript['text_isEmpty'] = function(block) {
+Blockly.JavaScript['text_isEmpty'] = function() {
   // Is the string null?
-  var argument0 = Blockly.JavaScript.valueToCode(block, 'VALUE',
-      Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-  return ['!' + argument0, Blockly.JavaScript.ORDER_LOGICAL_NOT];
+  var argument = Blockly.JavaScript.valueToCode(this, 'VALUE', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-empty?"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "is text empty?"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
 };
 
-Blockly.JavaScript['text_indexOf'] = function(block) {
-  // Search the text for a substring.
-  var operator = block.getFieldValue('END') == 'FIRST' ?
-      'indexOf' : 'lastIndexOf';
-  var argument0 = Blockly.JavaScript.valueToCode(block, 'FIND',
-      Blockly.JavaScript.ORDER_NONE) || '\'\'';
-  var argument1 = Blockly.JavaScript.valueToCode(block, 'VALUE',
-      Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-  var code = argument1 + '.' + operator + '(' + argument0 + ') + 1';
-  return [code, Blockly.JavaScript.ORDER_MEMBER];
+Blockly.JavaScript['text_compare'] = function() {
+  // Basic compare operators
+  var mode = this.getFieldValue('OP');
+  var prim = Blockly.JavaScript.text_compare.OPERATORS[mode];
+  var operator1 = prim[0];
+  var operator2 = prim[1];
+  var order = prim[2];
+  var argument0 = Blockly.JavaScript.valueToCode(this, 'TEXT1', order) || "\"\"";
+  var argument1 = Blockly.JavaScript.valueToCode(this, 'TEXT2', order) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + operator1
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument0 + Blockly.JavaScript.YAIL_SPACER + argument1
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + operator2
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
 };
 
-Blockly.JavaScript['text_charAt'] = function(block) {
-  // Get letter at index.
-  // Note: Until January 2013 this block did not have the WHERE input.
-  var where = block.getFieldValue('WHERE') || 'FROM_START';
-  var at = Blockly.JavaScript.valueToCode(block, 'AT',
-      Blockly.JavaScript.ORDER_UNARY_NEGATION) || '1';
-  var text = Blockly.JavaScript.valueToCode(block, 'VALUE',
-      Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-  switch (where) {
-    case 'FIRST':
-      var code = text + '.charAt(0)';
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    case 'LAST':
-      var code = text + '.slice(-1)';
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    case 'FROM_START':
-      // Blockly uses one-based indicies.
-      if (Blockly.isNumber(at)) {
-        // If the index is a naked number, decrement it right now.
-        at = parseFloat(at) - 1;
-      } else {
-        // If the index is dynamic, decrement it in code.
-        at += ' - 1';
-      }
-      var code = text + '.charAt(' + at + ')';
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    case 'FROM_END':
-      var code = text + '.slice(-' + at + ').charAt(0)';
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-    case 'RANDOM':
-      var functionName = Blockly.JavaScript.provideFunction_(
-          'text_random_letter',
-          [ 'function ' + Blockly.JavaScript.FUNCTION_NAME_PLACEHOLDER_ +
-              '(text) {',
-            '  var x = Math.floor(Math.random() * text.length);',
-            '  return text[x];',
-            '}']);
-      code = functionName + '(' + text + ')';
-      return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+Blockly.JavaScript['text_compare'].OPERATORS = {
+  LT: ['string<?', 'text<', Blockly.JavaScript.ORDER_NONE],
+  GT: ['string>?', 'text>', Blockly.JavaScript.ORDER_NONE],
+  EQUAL: ['string=?', 'text=', Blockly.JavaScript.ORDER_NONE]
+};
+
+Blockly.JavaScript['text_trim'] = function() {
+  // String trim
+  var argument = Blockly.JavaScript.valueToCode(this, 'TEXT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-trim"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "trim"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
+};
+
+Blockly.JavaScript['text_changeCase'] = function() {
+  // String change case.
+  var mode = this.getFieldValue('OP');
+  var tuple = Blockly.JavaScript.text_changeCase.OPERATORS[mode];
+  var operator1 = tuple[0];
+  var operator2 = tuple[1];
+  var order = tuple[2];
+  var argument = Blockly.JavaScript.valueToCode(this, 'TEXT', order) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + operator1
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + operator2
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
+};
+
+Blockly.JavaScript['text_changeCase'].OPERATORS = {
+  UPCASE: ['string-to-upper-case', 'upcase', Blockly.JavaScript.ORDER_NONE],
+  DOWNCASE: ['string-to-lower-case', 'downcase', Blockly.JavaScript.ORDER_NONE]
+};
+
+Blockly.JavaScript.text_starts_at = function() {
+  // String starts at
+  var argument0 = Blockly.JavaScript.valueToCode(this, 'TEXT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var argument1 = Blockly.JavaScript.valueToCode(this, 'PIECE', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-starts-at"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument0 + Blockly.JavaScript.YAIL_SPACER + argument1
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "starts at"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
+};
+
+Blockly.JavaScript['text_contains'] = function() {
+  // String contains.
+  var argument0 = Blockly.JavaScript.valueToCode(this, 'TEXT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var argument1 = Blockly.JavaScript.valueToCode(this, 'PIECE', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-contains"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument0 + Blockly.JavaScript.YAIL_SPACER + argument1
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "contains"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
+};
+
+Blockly.JavaScript['text_split'] = function() {
+  // String split operations.
+  // Note that the type of arg2 might be text or list, depending on the dropdown selection
+  var mode = this.getFieldValue('OP');
+  var tuple = Blockly.JavaScript.text_split.OPERATORS[mode];
+  var operator1 = tuple[0];
+  var operator2 = tuple[1];
+  var order = tuple[2];
+  var arg2Type = tuple[3];
+  var argument0 = Blockly.JavaScript.valueToCode(this, 'TEXT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var argument1 = Blockly.JavaScript.valueToCode(this, 'AT', Blockly.JavaScript.ORDER_NONE) || 1;
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + operator1
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument0 + Blockly.JavaScript.YAIL_SPACER + argument1
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text" +  Blockly.JavaScript.YAIL_SPACER + arg2Type
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + operator2
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, order ];
+};
+
+Blockly.JavaScript['text_split'].OPERATORS = {
+  SPLITATFIRST : [ 'string-split-at-first', 'split at first',
+      Blockly.JavaScript.ORDER_ATOMIC, 'text' ],
+  SPLITATFIRSTOFANY : [ 'string-split-at-first-of-any',
+      'split at first of any', Blockly.JavaScript.ORDER_ATOMIC, 'list' ],
+  SPLIT : [ 'string-split', 'split', Blockly.JavaScript.ORDER_ATOMIC, 'text' ],
+  SPLITATANY : [ 'string-split-at-any', 'split at any', Blockly.JavaScript.ORDER_ATOMIC, 'list' ]
+};
+
+Blockly.JavaScript['text_split_at_spaces'] = function() {
+  // split at spaces
+  var argument = Blockly.JavaScript.valueToCode(this, 'TEXT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-split-at-spaces"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "split at spaces"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
+};
+
+Blockly.JavaScript['text_segment'] = function() {
+  // Create string segment
+  var argument0 = Blockly.JavaScript.valueToCode(this, 'TEXT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var argument1 = Blockly.JavaScript.valueToCode(this, 'START', Blockly.JavaScript.ORDER_NONE) || 1;
+  var argument2 = Blockly.JavaScript.valueToCode(this, 'LENGTH', Blockly.JavaScript.ORDER_NONE) || 1;
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-substring"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument0 + Blockly.JavaScript.YAIL_SPACER + argument1
+      + Blockly.JavaScript.YAIL_SPACER + argument2
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text number number"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "segment"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
+};
+
+Blockly.JavaScript['text_replace_all'] = function() {
+  // String replace with segment
+  var argument0 = Blockly.JavaScript.valueToCode(this, 'TEXT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var argument1 = Blockly.JavaScript.valueToCode(this, 'SEGMENT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var argument2 = Blockly.JavaScript.valueToCode(this, 'REPLACEMENT', Blockly.JavaScript.ORDER_NONE) || "\"\"";
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "string-replace-all"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument0 + Blockly.JavaScript.YAIL_SPACER + argument1
+      + Blockly.JavaScript.YAIL_SPACER + argument2
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text text text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "replace all"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
+};
+
+Blockly.JavaScript['obsufcated_text'] = function() {
+  // Deobsfucate the TEXT input argument
+  var setupObsfucation = function(input, confounder) {
+    // The algorithm below is also implemented in scheme in runtime.scm
+    // If you change it here, you have to change it there!
+    // Note: This algorithm is like xor, if applied to its output
+    // it regenerates it input.
+    var acc = [];
+    // First make sure the confounder is long enough...
+    while (confounder.length < input.length) {
+      confounder += confounder;
+    }
+    for (var i = 0; i < input.length; i++) {
+      var c = (input.charCodeAt(i) ^ confounder.charCodeAt(i)) & 0xFF;
+      var b = (c ^ input.length - i) & 0xFF;
+      var b2 = ((c >> 8) ^ i) & 0xFF;
+      acc.push(String.fromCharCode((b2 << 8 | b) & 0xFF));
+    }
+    return acc.join('');
   }
-  throw 'Unhandled option (text_charAt).';
-};
-
-Blockly.JavaScript['text_getSubstring'] = function(block) {
-  // Get substring.
-  var text = Blockly.JavaScript.valueToCode(block, 'STRING',
-      Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-  var where1 = block.getFieldValue('WHERE1');
-  var where2 = block.getFieldValue('WHERE2');
-  var at1 = Blockly.JavaScript.valueToCode(block, 'AT1',
-      Blockly.JavaScript.ORDER_NONE) || '1';
-  var at2 = Blockly.JavaScript.valueToCode(block, 'AT2',
-      Blockly.JavaScript.ORDER_NONE) || '1';
-  if (where1 == 'FIRST' && where2 == 'LAST') {
-    var code = text;
-  } else {
-    var functionName = Blockly.JavaScript.provideFunction_(
-        'text_get_substring',
-        [ 'function ' + Blockly.JavaScript.FUNCTION_NAME_PLACEHOLDER_ +
-            '(text, where1, at1, where2, at2) {',
-          '  function getAt(where, at) {',
-          '    if (where == \'FROM_START\') {',
-          '      at--;',
-          '    } else if (where == \'FROM_END\') {',
-          '      at = text.length - at;',
-          '    } else if (where == \'FIRST\') {',
-          '      at = 0;',
-          '    } else if (where == \'LAST\') {',
-          '      at = text.length - 1;',
-          '    } else {',
-          '      throw \'Unhandled option (text_getSubstring).\';',
-          '    }',
-          '    return at;',
-          '  }',
-          '  at1 = getAt(where1, at1);',
-          '  at2 = getAt(where2, at2) + 1;',
-          '  return text.slice(at1, at2);',
-          '}']);
-    var code = functionName + '(' + text + ', \'' +
-        where1 + '\', ' + at1 + ', \'' + where2 + '\', ' + at2 + ')';
-  }
-  return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-Blockly.JavaScript['text_changeCase'] = function(block) {
-  // Change capitalization.
-  var OPERATORS = {
-    'UPPERCASE': '.toUpperCase()',
-    'LOWERCASE': '.toLowerCase()',
-    'TITLECASE': null
-  };
-  var operator = OPERATORS[block.getFieldValue('CASE')];
-  var code;
-  if (operator) {
-    // Upper and lower case are functions built into JavaScript.
-    var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT',
-        Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-    code = argument0 + operator;
-  } else {
-    // Title case is not a native JavaScript function.  Define one.
-    var functionName = Blockly.JavaScript.provideFunction_(
-        'text_toTitleCase',
-        [ 'function ' +
-            Blockly.JavaScript.FUNCTION_NAME_PLACEHOLDER_ + '(str) {',
-          '  return str.replace(/\\S+/g,',
-          '      function(txt) {return txt[0].toUpperCase() + ' +
-              'txt.substring(1).toLowerCase();});',
-          '}']);
-    var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT',
-        Blockly.JavaScript.ORDER_NONE) || '\'\'';
-    code = functionName + '(' + argument0 + ')';
-  }
-  return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-Blockly.JavaScript['text_trim'] = function(block) {
-  // Trim spaces.
-  var OPERATORS = {
-    'LEFT': '.trimLeft()',
-    'RIGHT': '.trimRight()',
-    'BOTH': '.trim()'
-  };
-  var operator = OPERATORS[block.getFieldValue('MODE')];
-  var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT',
-      Blockly.JavaScript.ORDER_MEMBER) || '\'\'';
-  return [argument0 + operator, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-Blockly.JavaScript['text_print'] = function(block) {
-  // Print statement.
-  var argument0 = Blockly.JavaScript.valueToCode(block, 'TEXT',
-      Blockly.JavaScript.ORDER_NONE) || '\'\'';
-  return 'window.alert(' + argument0 + ');\n';
-};
-
-Blockly.JavaScript['text_prompt'] = function(block) {
-  // Prompt function (internal message).
-  var msg = Blockly.JavaScript.quote_(block.getFieldValue('TEXT'));
-  var code = 'window.prompt(' + msg + ')';
-  var toNumber = block.getFieldValue('TYPE') == 'NUMBER';
-  if (toNumber) {
-    code = 'parseFloat(' + code + ')';
-  }
-  return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-Blockly.JavaScript['text_prompt_ext'] = function(block) {
-  // Prompt function (external message).
-  var msg = Blockly.JavaScript.valueToCode(block, 'TEXT',
-      Blockly.JavaScript.ORDER_NONE) || '\'\'';
-  var code = 'window.prompt(' + msg + ')';
-  var toNumber = block.getFieldValue('TYPE') == 'NUMBER';
-  if (toNumber) {
-    code = 'parseFloat(' + code + ')';
-  }
-  return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
+  var input = this.getFieldValue('TEXT');
+  var argument = Blockly.JavaScript.quote_(setupObsfucation(input, this.confounder));
+  var code = Blockly.JavaScript.YAIL_CALL_YAIL_PRIMITIVE + "text-deobsfucate"
+      + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_OPEN_COMBINATION
+      + Blockly.JavaScript.YAIL_LIST_CONSTRUCTOR + Blockly.JavaScript.YAIL_SPACER
+      + argument + Blockly.JavaScript.YAIL_SPACER
+      + Blockly.JavaScript.quote_(this.confounder) + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  code = code + Blockly.JavaScript.YAIL_SPACER + Blockly.JavaScript.YAIL_QUOTE
+      + Blockly.JavaScript.YAIL_OPEN_COMBINATION + "text text"
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER;
+  code = code + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + "deobsfucate text"
+      + Blockly.JavaScript.YAIL_DOUBLE_QUOTE + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
 };

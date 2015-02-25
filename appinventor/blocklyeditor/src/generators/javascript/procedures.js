@@ -1,108 +1,87 @@
-/**
- * @license
- * Visual Blocks Language
- *
- * Copyright 2012 Google Inc.
- * https://developers.google.com/blockly/
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *   http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+// -*- mode: java; c-basic-offset: 2; -*-
+// Copyright 2012 Massachusetts Institute of Technology. All rights reserved.
 
 /**
- * @fileoverview Generating JavaScript for procedure blocks.
- * @author fraser@google.com (Neil Fraser)
+ * @license
+ * @fileoverview Procedure yail generators for Blockly, modified for MIT App Inventor.
+ * @author mckinney@mit.edu (Andrew F. McKinney)
  */
+
 'use strict';
 
 goog.provide('Blockly.JavaScript.procedures');
 
-goog.require('Blockly.JavaScript');
+/**
+ * Lyn's History:
+ * [lyn, 10/29/13] Fixed bug in handling parameters of zero-arg procedures.
+ * [lyn, 10/27/13] Modified procedure names to begin with YAIL_PROC_TAG (currently 'p$')
+ *     and parameters to begin with YAIL_LOCAL_VAR_TAG (currently '$').
+ *     At least on Kawa-legal first character is necessary to ensure AI identifiers
+ *     satisfy Kawa's identifier rules. And the procedure 'p$' tag is necessary to
+ *     distinguish procedures from globals (which use the 'g$' tag).
+ * [lyn, 01/15/2013] Edited to remove STACK (no longer necessary with DO-THEN-RETURN)
+ */
 
+Blockly.JavaScript.YAIL_PROC_TAG = 'p$'; // See notes on this in generators/yail/variables.js
 
-Blockly.JavaScript['procedures_defreturn'] = function(block) {
-  // Define a procedure with a return value.
-  var funcName = Blockly.JavaScript.variableDB_.getName(
-      block.getFieldValue('NAME'), Blockly.Procedures.NAME_TYPE);
-  var branch = Blockly.JavaScript.statementToCode(block, 'STACK');
-  if (Blockly.JavaScript.STATEMENT_PREFIX) {
-    branch = Blockly.JavaScript.prefixLines(
-        Blockly.JavaScript.STATEMENT_PREFIX.replace(/%1/g,
-        '\'' + block.id + '\''), Blockly.JavaScript.INDENT) + branch;
-  }
-  if (Blockly.JavaScript.INFINITE_LOOP_TRAP) {
-    branch = Blockly.JavaScript.INFINITE_LOOP_TRAP.replace(/%1/g,
-        '\'' + block.id + '\'') + branch;
-  }
-  var returnValue = Blockly.JavaScript.valueToCode(block, 'RETURN',
-      Blockly.JavaScript.ORDER_NONE) || '';
-  if (returnValue) {
-    returnValue = '  return ' + returnValue + ';\n';
-  }
-  var args = [];
-  for (var x = 0; x < block.arguments_.length; x++) {
-    args[x] = Blockly.JavaScript.variableDB_.getName(block.arguments_[x],
-        Blockly.Variables.NAME_TYPE);
-  }
-  var code = 'function ' + funcName + '(' + args.join(', ') + ') {\n' +
-      branch + returnValue + '}';
-  code = Blockly.JavaScript.scrub_(block, code);
-  Blockly.JavaScript.definitions_[funcName] = code;
-  return null;
-};
-
-// Defining a procedure without a return value uses the same generator as
-// a procedure with a return value.
-Blockly.JavaScript['procedures_defnoreturn'] =
-    Blockly.JavaScript['procedures_defreturn'];
-
-Blockly.JavaScript['procedures_callreturn'] = function(block) {
-  // Call a procedure with a return value.
-  var funcName = Blockly.JavaScript.variableDB_.getName(
-      block.getFieldValue('NAME'), Blockly.Procedures.NAME_TYPE);
-  var args = [];
-  for (var x = 0; x < block.arguments_.length; x++) {
-    args[x] = Blockly.JavaScript.valueToCode(block, 'ARG' + x,
-        Blockly.JavaScript.ORDER_COMMA) || 'null';
-  }
-  var code = funcName + '(' + args.join(', ') + ')';
-  return [code, Blockly.JavaScript.ORDER_FUNCTION_CALL];
-};
-
-Blockly.JavaScript['procedures_callnoreturn'] = function(block) {
-  // Call a procedure with no return value.
-  var funcName = Blockly.JavaScript.variableDB_.getName(
-      block.getFieldValue('NAME'), Blockly.Procedures.NAME_TYPE);
-  var args = [];
-  for (var x = 0; x < block.arguments_.length; x++) {
-    args[x] = Blockly.JavaScript.valueToCode(block, 'ARG' + x,
-        Blockly.JavaScript.ORDER_COMMA) || 'null';
-  }
-  var code = funcName + '(' + args.join(', ') + ');\n';
+// Generator code for procedure call with return
+// [lyn, 01/15/2013] Edited to remove STACK (no longer necessary with DO-THEN-RETURN)
+Blockly.JavaScript['procedures_defreturn'] = function() {
+  var argPrefix = Blockly.JavaScript.YAIL_LOCAL_VAR_TAG
+                  + (Blockly.usePrefixInJavaScript && this.arguments_.length != 0 ? "param_" : "");
+  var args = this.arguments_.map(function (arg) {return argPrefix + arg;}).join(' ');
+  var procName = Blockly.JavaScript.YAIL_PROC_TAG + this.getFieldValue('NAME');
+  var returnVal = Blockly.JavaScript.valueToCode(this, 'RETURN', Blockly.JavaScript.ORDER_NONE) || Blockly.JavaScript.YAIL_FALSE;
+  var code = Blockly.JavaScript.YAIL_DEFINE + Blockly.JavaScript.YAIL_OPEN_COMBINATION + procName
+      + Blockly.JavaScript.YAIL_SPACER + args + Blockly.JavaScript.YAIL_CLOSE_COMBINATION 
+      + Blockly.JavaScript.YAIL_SPACER + returnVal + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
   return code;
 };
 
-Blockly.JavaScript['procedures_ifreturn'] = function(block) {
-  // Conditionally return value from a procedure.
-  var condition = Blockly.JavaScript.valueToCode(block, 'CONDITION',
-      Blockly.JavaScript.ORDER_NONE) || 'false';
-  var code = 'if (' + condition + ') {\n';
-  if (block.hasReturnValue_) {
-    var value = Blockly.JavaScript.valueToCode(block, 'VALUE',
-        Blockly.JavaScript.ORDER_NONE) || 'null';
-    code += '  return ' + value + ';\n';
-  } else {
-    code += '  return;\n';
-  }
-  code += '}\n';
+// Generator code for procedure call with return
+Blockly.JavaScript['procedures_defnoreturn'] = function() {
+  var argPrefix = Blockly.JavaScript.YAIL_LOCAL_VAR_TAG
+                  + (Blockly.usePrefixInJavaScript && this.arguments_.length != 0 ? "param_" : "");
+  var args = this.arguments_.map(function (arg) {return argPrefix + arg;}).join(' ');
+  var procName = Blockly.JavaScript.YAIL_PROC_TAG + this.getFieldValue('NAME');
+  var body = Blockly.JavaScript.statementToCode(this, 'STACK', Blockly.JavaScript.ORDER_NONE)  || Blockly.JavaScript.YAIL_FALSE;
+  var code = Blockly.JavaScript.YAIL_DEFINE + Blockly.JavaScript.YAIL_OPEN_COMBINATION + procName
+      + Blockly.JavaScript.YAIL_SPACER + args + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + body
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
   return code;
+};
+
+Blockly.JavaScript['procedure_lexical_variable_get'] = function() {
+  return Blockly.JavaScript.lexical_variable_get.call(this);
+}
+
+//call the do return in control category
+Blockly.JavaScript['procedures_do_then_return'] = function() {
+  return Blockly.JavaScript.controls_do_then_return.call(this);
+}
+
+// Generator code for procedure call with return
+Blockly.JavaScript['procedures_callnoreturn'] = function() {
+  var procName = Blockly.JavaScript.YAIL_PROC_TAG + this.getFieldValue('PROCNAME');
+  var argCode = [];
+  for ( var x = 0;this.getInput("ARG" + x); x++) {
+    argCode[x] = Blockly.JavaScript.valueToCode(this, 'ARG' + x, Blockly.JavaScript.ORDER_NONE) || Blockly.JavaScript.YAIL_FALSE;
+  }
+  var code = Blockly.JavaScript.YAIL_OPEN_COMBINATION + Blockly.JavaScript.YAIL_GET_VARIABLE + procName
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER + argCode.join(' ')
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return code;
+};
+
+// Generator code for procedure call with return
+Blockly.JavaScript['procedures_callreturn'] = function() {
+  var procName = Blockly.JavaScript.YAIL_PROC_TAG + this.getFieldValue('PROCNAME');
+  var argCode = [];
+  for ( var x = 0; this.getInput("ARG" + x); x++) {
+    argCode[x] = Blockly.JavaScript.valueToCode(this, 'ARG' + x, Blockly.JavaScript.ORDER_NONE) || Blockly.JavaScript.YAIL_FALSE;
+  }
+  var code = Blockly.JavaScript.YAIL_OPEN_COMBINATION + Blockly.JavaScript.YAIL_GET_VARIABLE + procName
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION + Blockly.JavaScript.YAIL_SPACER + argCode.join(' ')
+      + Blockly.JavaScript.YAIL_CLOSE_COMBINATION;
+  return [ code, Blockly.JavaScript.ORDER_ATOMIC ];
 };

@@ -97,29 +97,42 @@
     './src/blocks/colors.js',
     './src/blocks/components.js',
 
-    //generator files
-    "./src/generators/yail.js",
-    "./src/generators/yail/componentblock.js",
-    "./src/generators/yail/lists.js",
-    "./src/generators/yail/math.js",
-    "./src/generators/yail/control.js",
-    "./src/generators/yail/logic.js",
-    "./src/generators/yail/text.js",
-    "./src/generators/yail/colors.js",
-    "./src/generators/yail/variables.js",
-    "./src/generators/yail/procedures.js",
+    //generator files for Yail
+    // "./src/generators/yail.js",
+    // "./src/generators/yail/componentblock.js",
+    // "./src/generators/yail/lists.js",
+    // "./src/generators/yail/math.js",
+    // "./src/generators/yail/control.js",
+    // "./src/generators/yail/logic.js",
+    // "./src/generators/yail/text.js",
+    // "./src/generators/yail/colors.js",
+    // "./src/generators/yail/variables.js",
+    // "./src/generators/yail/procedures.js",
+
+    // new javascript generator files
+    "./src/generators/javascript.js",
+    "./src/generators/javascript/componentblock.js",
+    "./src/generators/javascript/lists.js",
+    "./src/generators/javascript/math.js",
+    "./src/generators/javascript/control.js",
+    "./src/generators/javascript/logic.js",
+    "./src/generators/javascript/text.js",
+    "./src/generators/javascript/colors.js",
+    "./src/generators/javascript/variables.js",
+    "./src/generators/javascript/procedures.js",
     
     // generator files for JavaScript
+    // for the demo
     //"./src/generators/javascript/all.js",
-    "./src/generators/javascript.js",
-    "./src/generators/javascript/colour.js",
-    "./src/generators/javascript/lists.js",
-    "./src/generators/javascript/logic.js",
-    "./src/generators/javascript/loops.js",
-    "./src/generators/javascript/math.js",
-    "./src/generators/javascript/procedures.js",
-    "./src/generators/javascript/text.js",
-    "./src/generators/javascript/variables.js",
+    // "./src/generators/javascript.js",
+    // "./src/generators/javascript/colour.js",
+    // "./src/generators/javascript/lists.js",
+    // "./src/generators/javascript/logic.js",
+    // "./src/generators/javascript/loops.js",
+    // "./src/generators/javascript/math.js",
+    // "./src/generators/javascript/procedures.js",
+    // "./src/generators/javascript/text.js",
+    // "./src/generators/javascript/variables.js",
 
     // Repl
     "./src/replmgr.js"

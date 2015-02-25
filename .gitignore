@@ -18,3 +18,4 @@ reports/
 out/
 *.pyc
 .settings/org.eclipse.core.resources.prefs
+appinventor/appengine-java-sdk-1.9.17
